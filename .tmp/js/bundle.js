@@ -206,15 +206,15 @@ var PlayScene = {
       this.map = this.game.add.tilemap('tilemap');           
       this.map.addTilesetImage('tileset', 'tiles');
 
-      //Creacion de las layers
-      this.groundLayer = this.map.createLayer('Capa Terreno'); 
+      //Creacion de las layers     
       this.backgroundLayer = this.map.createLayer('Capa Fondo');
       this.water = this.map.createLayer('Agua');           
       this.death = this.map.createLayer('death'); //plano de muerte      
       this.decorado = this.map.createLayer('Capa Atravesable');
+      this.groundLayer = this.map.createLayer('Capa Terreno'); 
       //Personaje
       this._rush = this.game.add.sprite(20, 30, 'dude'); 
-      this._rush.scale.setTo(1.5, 1.5);
+      this._rush.scale.setTo(1.2, 1.2);
       //animaciones     
       this._rush.animations.add('left', [0, 1, 2, 3], 10, true);
       this._rush.animations.add('right', [5, 6, 7, 8], 10, true); 
