@@ -1,10 +1,10 @@
 'use strict';
 
-//TODO 1.1 Require de las escenas, play_scene, gameover_scene y menu_scene.
+//Require de las escenas, play_scene, gameover_scene y menu_scene.
 var PlayScene = require('./play_scene');
 var GameOver = require('./gameover_scene');
 var MenuScene = require('./menu_scene');
-//  The Google WebFont Loader will look for this object, so create it before loading the script.
+var GravityScene = require('./gravity_scene');  //Nueva escena para el menu pausa
 
 var BootScene = {
   preload: function () {
@@ -20,7 +20,6 @@ var BootScene = {
   }
 };
 
-
 var PreloaderScene = {
   preload: function () {
     this.loadingBar = this.game.add.sprite(100,300, 'preloader_bar');
@@ -29,27 +28,22 @@ var PreloaderScene = {
     this.game.stage.backgroundColor = "#000000";    
     
     this.load.onLoadStart.add(this.loadStart, this);
-    //TODO 2.1 Cargar el tilemap images/map.json con el nombre de la cache 'tilemap'.
-      //la imagen 'images/simples_pimples.png' con el nombre de la cache 'tiles' y
-      // el atlasJSONHash con 'images/rush_spritesheet.png' como imagen y 'images/rush_spritesheet.json'
-      //como descriptor de la animación.      
+    //Carga de tilemap y animaciones    
       this.game.load.image('tiles', 'images/tileset.png');    
       this.game.load.tilemap('tilemap', 'images/map.json', null, Phaser.Tilemap.TILED_JSON);
-      this.game.load.spritesheet('dude', 'images/dude.png', 32, 48);
-  
-      //this.game.load.atlasJSONHash('rush_idle01','images/rush_spritesheet.png','images/rush_spritesheet.json', Phaser.Loader.TEXTURE_ATLAS_JSON_HASH);
+      this.game.load.tilemap('tilemap2', 'images/map2.json', null, Phaser.Tilemap.TILED_JSON);
+      this.game.load.spritesheet('dude', 'images/dude.png', 32, 48);  
     
-      //TODO 2.2a Escuchar el evento onLoadComplete con el método loadComplete que el state 'play'
+      //Escuchar el evento onLoadComplete con el método loadComplete que el state 'play'
       this.game.load.onLoadComplete.add(this.loadComplete, this);
   },
 
   loadStart: function () {
     //this.game.state.start('play');
     console.log("Game Assets Loading ...");
-  },
+  },    
     
-    
-     //TODO 2.2b function loadComplete()
+     //Function loadComplete()
      loadComplete: function(){
       this.game.state.start('play');
      },
@@ -84,16 +78,13 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game');
   game.state.add('preloader', PreloaderScene);
   game.state.add('play', PlayScene);
   game.state.add('gameOver', GameOver);
-
+  game.state.add('gravityScene', GravityScene);
 
   game.state.start('boot');
 }
 
 window.onload = function () {
-  //var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game');
+  
   WebFont.load(wfconfig);
-
-//TODO 1.2 Añadir los states 'boot' BootScene, 'menu' MenuScene, 'preloader' PreloaderScene, 'play' PlayScene, 'gameOver' GameOver.
-//TODO 1.3 iniciar el state 'boot'.  
     
 };
