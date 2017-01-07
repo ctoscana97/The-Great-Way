@@ -54,8 +54,42 @@
          "width":50,
          "x":0,
          "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "height":25,
+         "name":"Objects",
+         "objects":[
+                {
+                 "height":117.030303030303,
+                 "id":1,
+                 "name":"StartPoint",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":125.090909090909,
+                 "x":34.1212121212121,
+                 "y":139.363636363636
+                }, 
+                {
+                 "height":110,
+                 "id":2,
+                 "name":"FinalPoint",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":70,
+                 "x":318,
+                 "y":1302.66666666667
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "width":50,
+         "x":0,
+         "y":0
         }],
- "nextobjectid":1,
+ "nextobjectid":4,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tileheight":64,
@@ -63,7 +97,7 @@
         {
          "columns":28,
          "firstgid":1,
-         "image":"UCM\/SEGUNDO\/PVLI\/Phaser_5\/src\/images\/tileset.png",
+         "image":"tileset.png",
          "imageheight":1088,
          "imagewidth":1794,
          "margin":0,

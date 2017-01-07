@@ -8,6 +8,8 @@ var Direction = {'LEFT':0, 'RIGHT':1, 'NONE':3}
 var map;
 var cursors;
 var jumptimer = 0;
+//GameObjects
+var winZone;
 //Scena de juego.
 var PlayScene = {
 
@@ -36,14 +38,24 @@ var PlayScene = {
       this.map = this.game.add.tilemap('tilemap');           
       this.map.addTilesetImage('tileset', 'tiles');
 
+      var start = this.map.objects["Objects"][0];
+	  var end = this.map.objects["Objects"][1];
+
       //Creacion de las layers     
       this.backgroundLayer = this.map.createLayer('Capa Fondo');
       this.water = this.map.createLayer('Agua');           
       this.death = this.map.createLayer('death'); //plano de muerte      
       this.decorado = this.map.createLayer('Capa Atravesable');
-      this.groundLayer = this.map.createLayer('Capa Terreno'); 
+      this.groundLayer = this.map.createLayer('Capa Terreno');       
+       
+      this.groundLayer.resizeWorld(); //resize world and adjust to the screen
+      this.backgroundLayer.resizeWorld();
+      this.death.resizeWorld();
+      this.decorado.resizeWorld();
+      this.water.resizeWorld(); 
+
       //Personaje
-      this._rush = this.game.add.sprite(20, 30, 'dude'); 
+      this._rush = this.game.add.sprite(start.x, start.y, 'dude'); 
       this._rush.scale.setTo(1.2, 1.2);
       //animaciones     
       this._rush.animations.add('left', [0, 1, 2, 3], 10, true);
@@ -51,13 +63,9 @@ var PlayScene = {
       //Colisiones con el plano de muerte y con el plano de muerte y con suelo.
       this.map.setCollisionBetween(1, 5000, true, 'death');    
       this.map.setCollisionBetween(1, 5000, true, 'Capa Terreno');
-      this.death.visible = false;
-       
-      this.groundLayer.resizeWorld(); //resize world and adjust to the screen
-      this.backgroundLayer.resizeWorld();
-      this.death.resizeWorld();
-      this.decorado.resizeWorld();
-      this.water.resizeWorld();     
+      this.death.visible = false;   
+
+      this.winZone = new Phaser.Rectangle(end.x, end.y, end.width, end.height);
     
       //nombre de la animación, frames, framerate, isloop
       this._rush.animations.add('run',
@@ -133,6 +141,10 @@ var PlayScene = {
 
 
         this.checkPlayerFell();
+
+        //Para terminar el nivel:
+        if(this.winZone.contains(this._rush.x + this._rush.width/2, this._rush.y + this._rush.height/2))
+        	this.game.state.start('gameOver');
     },
     
     
