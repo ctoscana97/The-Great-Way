@@ -45,6 +45,17 @@ module.exports = GameOver;
 var map;
 var cursors;
 var jumptimer = 0;
+//textos
+var textStart;
+//Pausa
+var pKey;
+var back; //backGround
+
+var buttonMenu;
+var buttonReanudar;
+
+var texto;
+var texto2;
 //Scena de juego.
 var GravityScene = {
     
@@ -52,13 +63,30 @@ var GravityScene = {
 
     //Método constructor...
   create: function () {      
+    ///BOTONES//////////////////////////////////
+    buttonMenu = this.game.add.button(400, 450, 
+                                          'button', 
+                                          this.volverMenu, 
+                                          this, 2, 1, 0);
+        buttonMenu.anchor.set(0.5);        
+        texto = this.game.add.text(0, 0, "Return Menu");
+        texto.anchor.set(0.5);        
+        buttonMenu.addChild(texto);
 
-      //Cargar el tilemap 'tilemap' y asignarle al tileset 'patrones' la imagen de sprites 'tiles'
+        buttonReanudar = this.game.add.button(400, 450, 
+                                          'button', 
+                                          this.Reanudar, 
+                                          this, 2, 1, 0);
+      buttonReanudar.anchor.set(0.5);        
+        texto2 = this.game.add.text(0, 0, "Resume");
+        texto2.anchor.set(0.5);        
+        buttonReanudar.addChild(texto2);
+    ///////////////////////////////////////////
+
+      //Cargar del tilemap y asignacion del tileset
       this.game.load.tilemap('tilemap2', 'images/map2.json', null, Phaser.Tilemap.TILED_JSON);
-
       this.game.load.image('tiles', 'images/tileset.png',  null, Phaser.Tilemap.TILED_JSON); 
-      //this.game.load.atlasJSONHash('rush_idle01','images/rush_spritesheet.png','images/rush_spritesheet.json', Phaser.Loader.TEXTURE_ATLAS_JSON_HASH);
-
+     
       this.map = this.game.add.tilemap('tilemap2');           
       this.map.addTilesetImage('tileset', 'tiles');
 
@@ -68,6 +96,13 @@ var GravityScene = {
       this.death = this.map.createLayer('death'); //plano de muerte      
       this.decorado = this.map.createLayer('Capa Atravesable');
       this.groundLayer = this.map.createLayer('Capa Terreno'); 
+      //Redimensionamos
+      this.groundLayer.resizeWorld(); //resize world and adjust to the screen
+      this.backgroundLayer.resizeWorld();
+      this.death.resizeWorld();
+      this.decorado.resizeWorld();
+      this.water.resizeWorld();  
+
       //Personaje
       this._rush = this.game.add.sprite(20, 300, 'dude'); 
       this._rush.scale.setTo(1.2, -1.2);
@@ -78,26 +113,26 @@ var GravityScene = {
       this.map.setCollisionBetween(1, 5000, true, 'death');    
       this.map.setCollisionBetween(1, 5000, true, 'Capa Terreno');
       this.death.visible = false;
-       
-      this.groundLayer.resizeWorld(); //resize world and adjust to the screen
-      this.backgroundLayer.resizeWorld();
-      this.death.resizeWorld();
-      this.decorado.resizeWorld();
-      this.water.resizeWorld();     
+
+      this.pKey = this.input.keyboard.addKey(Phaser.Keyboard.P);
+      this.pKey.onDown.add(this.togglePause, this);     
+   
+      this.textStart = this.game.add.text(50, 250, "Woops!, alguien"  + "\n" + 
+        "se dejó la gravedad" + "\n" + "puesta al revés.");    
+      back = this.game.add.sprite(this.game.camera.x, this.game.camera.y, 'back');
+      back.visible = false;
     
-      //nombre de la animación, frames, framerate, isloop
-      this._rush.animations.add('run',
-                    Phaser.Animation.generateFrameNames('rush_run',1,5,'',2),10,true);
-      this._rush.animations.add('stop',
-                    Phaser.Animation.generateFrameNames('rush_idle',1,1,'',2),0,false);
-      this._rush.animations.add('jump',
-                     Phaser.Animation.generateFrameNames('rush_jump',2,2,'',2),0,false);
       this.configure();
   },
    
 
     //IS called one per frame.
     update: function () {
+      if (!this.game.physics.arcade.isPaused){
+      buttonMenu.visible = false;
+      buttonReanudar.visible = false;
+      back.visible = false;
+      }
      var hitPlatforms = this.game.physics.arcade.collide(this._rush, this.groundLayer);
      this.cursors = this.game.input.keyboard.createCursorKeys();
       //  Reset the players velocity (movement)
@@ -153,7 +188,46 @@ var GravityScene = {
 
         this.checkPlayerFell();
     },
-     
+
+    togglePause: function(){
+      buttonMenu.destroy();
+      buttonReanudar.destroy();
+      back.visible = false;
+
+      back = this.game.add.sprite(this.game.camera.x, this.game.camera.y, 'back');
+        back.visible = true;
+
+        //Boton 1
+      buttonMenu = this.game.add.button(this.game.camera.x+400, this.game.camera.y+350, 
+                                          'button', 
+                                          this.volverMenu, 
+                                          this, 2, 1, 0);
+      buttonMenu.anchor.set(0.5);        
+        texto = this.game.add.text(0, 0, "Return Menu");
+        texto.anchor.set(0.5);        
+        buttonMenu.addChild(texto);
+      buttonMenu.visible = true;
+
+      //Boton 2
+      buttonReanudar = this.game.add.button(this.game.camera.x+400, this.game.camera.y+250, 
+                                          'button', 
+                                          this.Reanudar, 
+                                          this, 2, 1, 0);
+      buttonReanudar.anchor.set(0.5);        
+        texto2 = this.game.add.text(0, 0, "Resume");
+        texto2.anchor.set(0.5);        
+        buttonReanudar.addChild(texto2);
+      buttonReanudar.visible = true;
+
+      this.game.physics.arcade.isPaused = (this.game.physics.arcade.isPaused) ? false : true;
+    },
+    volverMenu: function (){
+        this.game.state.start('gravityScene');
+
+    },
+    Reanudar: function(){
+      this.game.physics.arcade.isPaused = (this.game.physics.arcade.isPaused) ? false : true;
+    },     
     
     onPlayerFell: function(){
         //TODO 6 Carga de 'gameOver';
@@ -205,7 +279,7 @@ var BootScene = {
   preload: function () {
     // load here assets required for the loading screen
     this.game.load.image('preloader_bar', 'images/preloader_bar.png');
-    this.game.load.spritesheet('button', 'images/buttons.png', 168, 70);
+    this.game.load.spritesheet('button', 'images/button.png', 250, 50);
     this.game.load.image('logo', 'images/phaser.png');
   },
 
@@ -229,6 +303,7 @@ var PreloaderScene = {
       this.game.load.tilemap('tilemap2', 'images/map2.json', null, Phaser.Tilemap.TILED_JSON);
       this.game.load.spritesheet('dude', 'images/dude.png', 32, 48); 
       this.game.load.image('menuPausa', 'images/menuPausa.png', 250, 412);
+      this.game.load.image('back', 'images/back.png', 800, 600);
     
       //Escuchar el evento onLoadComplete con el método loadComplete que el state 'play'
       this.game.load.onLoadComplete.add(this.loadComplete, this);
@@ -322,27 +397,49 @@ var jumptimer = 0;
 var winZone;
 //textos
 var textStart;
-var choiseLabel;
 //Pausa
 var pKey;
-var menu;
+var back; //backGround
+
+var buttonMenu;
+var buttonReanudar;
+
+var texto;
+var texto2;
 //Scena de juego.
 var PlayScene = {
 	menu: {},
     _rush: {}, //player
 
-    //Método constructor...
-  create: function () {      
+	//Método constructor...
+  	create: function () {    
+  	///BOTONES//////////////////////////////////
+		buttonMenu = this.game.add.button(400, 450, 
+                                          'button', 
+                                          this.volverMenu, 
+                                          this, 2, 1, 0);
+        buttonMenu.anchor.set(0.5);        
+        texto = this.game.add.text(0, 0, "Return Menu");
+        texto.anchor.set(0.5);        
+        buttonMenu.addChild(texto);
 
-      //Cargar el tilemap 'tilemap' y asignarle al tileset 'patrones' la imagen de sprites 'tiles'
+        buttonReanudar = this.game.add.button(400, 450, 
+                                          'button', 
+                                          this.Reanudar, 
+                                          this, 2, 1, 0);
+    	buttonReanudar.anchor.set(0.5);        
+        texto2 = this.game.add.text(0, 0, "Resume");
+        texto2.anchor.set(0.5);        
+        buttonReanudar.addChild(texto2);
+  	///////////////////////////////////////////  
+
+      //Cargar del tilemap y asignacion del tileset
       this.game.load.tilemap('tilemap', 'images/map.json', null, Phaser.Tilemap.TILED_JSON);
-
       this.game.load.image('tiles', 'images/tileset.png',  null, Phaser.Tilemap.TILED_JSON); 
-      //this.game.load.atlasJSONHash('rush_idle01','images/rush_spritesheet.png','images/rush_spritesheet.json', Phaser.Loader.TEXTURE_ATLAS_JSON_HASH);
 
       this.map = this.game.add.tilemap('tilemap');           
       this.map.addTilesetImage('tileset', 'tiles');     
-
+      //Objetos del mapa creados con Tiled
       var start = this.map.objects["Objects"][0];
 	  var end = this.map.objects["Objects"][1];	  
 
@@ -352,19 +449,22 @@ var PlayScene = {
       this.death = this.map.createLayer('death'); //plano de muerte      
       this.decorado = this.map.createLayer('Capa Atravesable');
       this.groundLayer = this.map.createLayer('Capa Terreno');       
-       
+      //Redimension
       this.groundLayer.resizeWorld(); //resize world and adjust to the screen
       this.backgroundLayer.resizeWorld();
       this.death.resizeWorld();
       this.decorado.resizeWorld();
       this.water.resizeWorld(); 
+      
       //Texto de tutorial
       this.textStart = this.game.add.text(50, 450, "Bienvenido!, recuerda que"  + "\n" + 
       	"puedes saltar diferente distancia" + "\n" + "dependiendo de cuanto pulses el botón de salto.");
-      this.choiseLabel = this.game.add.text(50, 450, " ");
-      //Personaje
-      this.menu = this.game.add.sprite(400, 400, 'menuPausa');
-      this.menu.visible = false;
+
+      //Elementos de menu de pausa
+      back = this.game.add.sprite(this.game.camera.x, this.game.camera.y, 'back');
+      back.visible = false;
+
+      //Personaje      
       this._rush = this.game.add.sprite(start.x, start.y, 'dude'); 
       this._rush.scale.setTo(1.2, 1.2);
       //animaciones     
@@ -378,62 +478,23 @@ var PlayScene = {
 
       //Zona de Final del nivel
       this.winZone = new Phaser.Rectangle(end.x, end.y, end.width, end.height);
-    
-      //nombre de la animación, frames, framerate, isloop
-      this._rush.animations.add('run',
-                    Phaser.Animation.generateFrameNames('rush_run',1,5,'',2),10,true);
-      this._rush.animations.add('stop',
-                    Phaser.Animation.generateFrameNames('rush_idle',1,1,'',2),0,false);
-      this._rush.animations.add('jump',
-                     Phaser.Animation.generateFrameNames('rush_jump',2,2,'',2),0,false);
 
       //tecla de Pausa
       this.pKey = this.input.keyboard.addKey(Phaser.Keyboard.P);
-      this.pKey.onDown.add(this.togglePause, this);     
-     //this.pKey.onDown.add(this.unpause, this);  
+      this.pKey.onDown.add(this.togglePause, this);      
 
       this.configure();
   },
-   unpause: function(event){
-   	console.log("caca");
-   	this.game.paused = true;
-        // Only act if paused
-        if(this.game.paused){
-            // Calculate the corners of the menu
-            this.menu = this.game.add.sprite(400, 400, 'menuPausa');
-      		this.menu.visible = true;
-
-            var x1 = 800/2 - 270/2, x2 = 800/2 + 270/2,
-                y1 = 600/2 - 180/2, y2 = 600/2 + 180/2;
-
-            // Check if the click was inside the menu
-            if(event.x > x1 && event.x < x2 && event.y > y1 && event.y < y2 ){
-                // The choicemap is an array that will help us see which item was clicked
-                var choisemap = ['one', 'two'];
-
-                // Get menu local coordinates for the click
-                var x = event.x - x1,
-                    y = event.y - y1;
-
-                // Calculate the choice 
-                var choise = Math.floor(x / 90) + 3*Math.floor(y / 90);
-
-                // Display the choice
-                this.choiseLabel.text = 'You chose menu item: ' + choisemap[choise];
-            }
-            else{
-                // Remove the menu and the label                
-      			this.menu.visible = false;
-                this.choiseLabel.destroy();
-
-                // Unpause the game
-                this.game.paused = false;
-            }
-        }
-    },
-   
+      
     //IS called one per frame.
     update: function () {
+    	//Ocultar la interfaz del menu de pausa
+    if (!this.game.physics.arcade.isPaused){
+    	buttonMenu.visible = false;
+  	 	buttonReanudar.visible = false;
+    	back.visible = false;
+    }
+
      var hitPlatforms = this.game.physics.arcade.collide(this._rush, this.groundLayer);
      this.cursors = this.game.input.keyboard.createCursorKeys();
       //  Reset the players velocity (movement)
@@ -491,16 +552,52 @@ var PlayScene = {
 
         //Para terminar el nivel:
         if(this.winZone.contains(this._rush.x + this._rush.width/2, this._rush.y + this._rush.height/2))
-        	this.game.state.start('gravityScene');
+        	this.game.state.start('gravityScene'); //Cargamos siguiente nivel
     },    
     togglePause: function(){
-    	this.game.paused = (this.game.paused) ? false : true;
+    	buttonMenu.destroy();
+    	buttonReanudar.destroy();
+    	back.visible = false;
+
+    	back = this.game.add.sprite(this.game.camera.x, this.game.camera.y, 'back');
+      	back.visible = true;
+
+      	//Boton 1
+    	buttonMenu = this.game.add.button(this.game.camera.x+400, this.game.camera.y+350, 
+                                          'button', 
+                                          this.volverMenu, 
+                                          this, 2, 1, 0);
+    	buttonMenu.anchor.set(0.5);        
+        texto = this.game.add.text(0, 0, "Return Menu");
+        texto.anchor.set(0.5);        
+        buttonMenu.addChild(texto);
+    	buttonMenu.visible = true;
+
+    	//Boton 2
+    	buttonReanudar = this.game.add.button(this.game.camera.x+400, this.game.camera.y+250, 
+                                          'button', 
+                                          this.Reanudar, 
+                                          this, 2, 1, 0);
+    	buttonReanudar.anchor.set(0.5);        
+        texto2 = this.game.add.text(0, 0, "Resume");
+        texto2.anchor.set(0.5);        
+        buttonReanudar.addChild(texto2);
+    	buttonReanudar.visible = true;
+
+    	this.game.physics.arcade.isPaused = (this.game.physics.arcade.isPaused) ? false : true;
     },
+    volverMenu: function (){
+        this.game.state.start('gravityScene');
+
+    },
+    Reanudar: function(){
+    	this.game.physics.arcade.isPaused = (this.game.physics.arcade.isPaused) ? false : true;
+    },
+
     onPlayerFell: function(){
         //TODO 6 Carga de 'gameOver';
         this.game.state.start('gameOver');
-    },
-    
+    },    
     checkPlayerFell: function(){
         if(this.game.physics.arcade.collide(this._rush, this.death))
             this.onPlayerFell();

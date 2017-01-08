@@ -3,6 +3,17 @@
 var map;
 var cursors;
 var jumptimer = 0;
+//textos
+var textStart;
+//Pausa
+var pKey;
+var back; //backGround
+
+var buttonMenu;
+var buttonReanudar;
+
+var texto;
+var texto2;
 //Scena de juego.
 var GravityScene = {
     
@@ -10,13 +21,30 @@ var GravityScene = {
 
     //Método constructor...
   create: function () {      
+    ///BOTONES//////////////////////////////////
+    buttonMenu = this.game.add.button(400, 450, 
+                                          'button', 
+                                          this.volverMenu, 
+                                          this, 2, 1, 0);
+        buttonMenu.anchor.set(0.5);        
+        texto = this.game.add.text(0, 0, "Return Menu");
+        texto.anchor.set(0.5);        
+        buttonMenu.addChild(texto);
 
-      //Cargar el tilemap 'tilemap' y asignarle al tileset 'patrones' la imagen de sprites 'tiles'
+        buttonReanudar = this.game.add.button(400, 450, 
+                                          'button', 
+                                          this.Reanudar, 
+                                          this, 2, 1, 0);
+      buttonReanudar.anchor.set(0.5);        
+        texto2 = this.game.add.text(0, 0, "Resume");
+        texto2.anchor.set(0.5);        
+        buttonReanudar.addChild(texto2);
+    ///////////////////////////////////////////
+
+      //Cargar del tilemap y asignacion del tileset
       this.game.load.tilemap('tilemap2', 'images/map2.json', null, Phaser.Tilemap.TILED_JSON);
-
       this.game.load.image('tiles', 'images/tileset.png',  null, Phaser.Tilemap.TILED_JSON); 
-      //this.game.load.atlasJSONHash('rush_idle01','images/rush_spritesheet.png','images/rush_spritesheet.json', Phaser.Loader.TEXTURE_ATLAS_JSON_HASH);
-
+     
       this.map = this.game.add.tilemap('tilemap2');           
       this.map.addTilesetImage('tileset', 'tiles');
 
@@ -26,6 +54,13 @@ var GravityScene = {
       this.death = this.map.createLayer('death'); //plano de muerte      
       this.decorado = this.map.createLayer('Capa Atravesable');
       this.groundLayer = this.map.createLayer('Capa Terreno'); 
+      //Redimensionamos
+      this.groundLayer.resizeWorld(); //resize world and adjust to the screen
+      this.backgroundLayer.resizeWorld();
+      this.death.resizeWorld();
+      this.decorado.resizeWorld();
+      this.water.resizeWorld();  
+
       //Personaje
       this._rush = this.game.add.sprite(20, 300, 'dude'); 
       this._rush.scale.setTo(1.2, -1.2);
@@ -36,26 +71,26 @@ var GravityScene = {
       this.map.setCollisionBetween(1, 5000, true, 'death');    
       this.map.setCollisionBetween(1, 5000, true, 'Capa Terreno');
       this.death.visible = false;
-       
-      this.groundLayer.resizeWorld(); //resize world and adjust to the screen
-      this.backgroundLayer.resizeWorld();
-      this.death.resizeWorld();
-      this.decorado.resizeWorld();
-      this.water.resizeWorld();     
+
+      this.pKey = this.input.keyboard.addKey(Phaser.Keyboard.P);
+      this.pKey.onDown.add(this.togglePause, this);     
+   
+      this.textStart = this.game.add.text(50, 250, "Woops!, alguien"  + "\n" + 
+        "se dejó la gravedad" + "\n" + "puesta al revés.");    
+      back = this.game.add.sprite(this.game.camera.x, this.game.camera.y, 'back');
+      back.visible = false;
     
-      //nombre de la animación, frames, framerate, isloop
-      this._rush.animations.add('run',
-                    Phaser.Animation.generateFrameNames('rush_run',1,5,'',2),10,true);
-      this._rush.animations.add('stop',
-                    Phaser.Animation.generateFrameNames('rush_idle',1,1,'',2),0,false);
-      this._rush.animations.add('jump',
-                     Phaser.Animation.generateFrameNames('rush_jump',2,2,'',2),0,false);
       this.configure();
   },
    
 
     //IS called one per frame.
     update: function () {
+      if (!this.game.physics.arcade.isPaused){
+      buttonMenu.visible = false;
+      buttonReanudar.visible = false;
+      back.visible = false;
+      }
      var hitPlatforms = this.game.physics.arcade.collide(this._rush, this.groundLayer);
      this.cursors = this.game.input.keyboard.createCursorKeys();
       //  Reset the players velocity (movement)
@@ -111,7 +146,46 @@ var GravityScene = {
 
         this.checkPlayerFell();
     },
-     
+
+    togglePause: function(){
+      buttonMenu.destroy();
+      buttonReanudar.destroy();
+      back.visible = false;
+
+      back = this.game.add.sprite(this.game.camera.x, this.game.camera.y, 'back');
+        back.visible = true;
+
+        //Boton 1
+      buttonMenu = this.game.add.button(this.game.camera.x+400, this.game.camera.y+350, 
+                                          'button', 
+                                          this.volverMenu, 
+                                          this, 2, 1, 0);
+      buttonMenu.anchor.set(0.5);        
+        texto = this.game.add.text(0, 0, "Return Menu");
+        texto.anchor.set(0.5);        
+        buttonMenu.addChild(texto);
+      buttonMenu.visible = true;
+
+      //Boton 2
+      buttonReanudar = this.game.add.button(this.game.camera.x+400, this.game.camera.y+250, 
+                                          'button', 
+                                          this.Reanudar, 
+                                          this, 2, 1, 0);
+      buttonReanudar.anchor.set(0.5);        
+        texto2 = this.game.add.text(0, 0, "Resume");
+        texto2.anchor.set(0.5);        
+        buttonReanudar.addChild(texto2);
+      buttonReanudar.visible = true;
+
+      this.game.physics.arcade.isPaused = (this.game.physics.arcade.isPaused) ? false : true;
+    },
+    volverMenu: function (){
+        this.game.state.start('gravityScene');
+
+    },
+    Reanudar: function(){
+      this.game.physics.arcade.isPaused = (this.game.physics.arcade.isPaused) ? false : true;
+    },     
     
     onPlayerFell: function(){
         //TODO 6 Carga de 'gameOver';

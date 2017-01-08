@@ -10,7 +10,7 @@ var BootScene = {
   preload: function () {
     // load here assets required for the loading screen
     this.game.load.image('preloader_bar', 'images/preloader_bar.png');
-    this.game.load.spritesheet('button', 'images/buttons.png', 168, 70);
+    this.game.load.spritesheet('button', 'images/button.png', 250, 50);
     this.game.load.image('logo', 'images/phaser.png');
   },
 
@@ -34,6 +34,7 @@ var PreloaderScene = {
       this.game.load.tilemap('tilemap2', 'images/map2.json', null, Phaser.Tilemap.TILED_JSON);
       this.game.load.spritesheet('dude', 'images/dude.png', 32, 48); 
       this.game.load.image('menuPausa', 'images/menuPausa.png', 250, 412);
+      this.game.load.image('back', 'images/back.png', 800, 600);
     
       //Escuchar el evento onLoadComplete con el método loadComplete que el state 'play'
       this.game.load.onLoadComplete.add(this.loadComplete, this);
