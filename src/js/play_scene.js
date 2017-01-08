@@ -2,26 +2,22 @@
 
 //Enumerados: PlayerState son los estado por los que pasa el player. Directions son las direcciones a las que se puede
 //mover el player.
-var PlayerState = {'JUMP':0, 'RUN':1, 'FALLING':2, 'STOP':3}
-var Direction = {'LEFT':0, 'RIGHT':1, 'NONE':3}
 
 var map;
 var cursors;
 var jumptimer = 0;
 //GameObjects
 var winZone;
-
+//textos
+var textStart;
+var choiseLabel;
 //Pausa
-var spaceKey;
+var pKey;
+var menu;
 //Scena de juego.
 var PlayScene = {
-
+	menu: {},
     _rush: {}, //player
-    _speed: 300, //velocidad del player
-    _jumpSpeed: 600, //velocidad de salto
-    _jumpHight: 150, //altura máxima del salto.
-    _playerState: PlayerState.STOP, //estado del player
-    _direction: Direction.NONE,  //dirección inicial del player. NONE es ninguna dirección.
 
     //Método constructor...
   create: function () {      
@@ -50,18 +46,25 @@ var PlayScene = {
       this.death.resizeWorld();
       this.decorado.resizeWorld();
       this.water.resizeWorld(); 
-
+      //Texto de tutorial
+      this.textStart = this.game.add.text(50, 450, "Bienvenido!, recuerda que"  + "\n" + 
+      	"puedes saltar diferente distancia" + "\n" + "dependiendo de cuanto pulses el botón de salto.");
+      this.choiseLabel = this.game.add.text(50, 450, " ");
       //Personaje
+      this.menu = this.game.add.sprite(400, 400, 'menuPausa');
+      this.menu.visible = false;
       this._rush = this.game.add.sprite(start.x, start.y, 'dude'); 
       this._rush.scale.setTo(1.2, 1.2);
       //animaciones     
       this._rush.animations.add('left', [0, 1, 2, 3], 10, true);
       this._rush.animations.add('right', [5, 6, 7, 8], 10, true); 
+
       //Colisiones con el plano de muerte y con el plano de muerte y con suelo.
       this.map.setCollisionBetween(1, 5000, true, 'death');    
       this.map.setCollisionBetween(1, 5000, true, 'Capa Terreno');
-      this.death.visible = false;   
-      //Final del nivel
+      this.death.visible = false; 
+
+      //Zona de Final del nivel
       this.winZone = new Phaser.Rectangle(end.x, end.y, end.width, end.height);
     
       //nombre de la animación, frames, framerate, isloop
@@ -72,11 +75,50 @@ var PlayScene = {
       this._rush.animations.add('jump',
                      Phaser.Animation.generateFrameNames('rush_jump',2,2,'',2),0,false);
 
-      this.spaceKey = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-      this.spaceKey.onDown.add(this.togglePause, this);
+      //tecla de Pausa
+      this.pKey = this.input.keyboard.addKey(Phaser.Keyboard.P);
+      this.pKey.onDown.add(this.togglePause, this);     
+     //this.pKey.onDown.add(this.unpause, this);  
 
       this.configure();
   },
+   unpause: function(event){
+   	console.log("caca");
+   	this.game.paused = true;
+        // Only act if paused
+        if(this.game.paused){
+            // Calculate the corners of the menu
+            this.menu = this.game.add.sprite(400, 400, 'menuPausa');
+      		this.menu.visible = true;
+
+            var x1 = 800/2 - 270/2, x2 = 800/2 + 270/2,
+                y1 = 600/2 - 180/2, y2 = 600/2 + 180/2;
+
+            // Check if the click was inside the menu
+            if(event.x > x1 && event.x < x2 && event.y > y1 && event.y < y2 ){
+                // The choicemap is an array that will help us see which item was clicked
+                var choisemap = ['one', 'two'];
+
+                // Get menu local coordinates for the click
+                var x = event.x - x1,
+                    y = event.y - y1;
+
+                // Calculate the choice 
+                var choise = Math.floor(x / 90) + 3*Math.floor(y / 90);
+
+                // Display the choice
+                this.choiseLabel.text = 'You chose menu item: ' + choisemap[choise];
+            }
+            else{
+                // Remove the menu and the label                
+      			this.menu.visible = false;
+                this.choiseLabel.destroy();
+
+                // Unpause the game
+                this.game.paused = false;
+            }
+        }
+    },
    
     //IS called one per frame.
     update: function () {
@@ -140,7 +182,7 @@ var PlayScene = {
         	this.game.state.start('gravityScene');
     },    
     togglePause: function(){
-    	this.game.physics.arcade.isPaused = (this.game.physics.arcade.isPaused) ? false : true;
+    	this.game.paused = (this.game.paused) ? false : true;
     },
     onPlayerFell: function(){
         //TODO 6 Carga de 'gameOver';
@@ -155,14 +197,10 @@ var PlayScene = {
     //configure the scene
     configure: function(){
         //Start the Arcade Physics systems
-        // this.game.world.setBounds(0, 0, 2400, 160);
-        //3200,640
         this.game.world.setBounds(0, 0, 3200, 1600);
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
-        //this.game.physics.startSystem(Phaser.Physics.NINJA);
         this.game.stage.backgroundColor = '#a9f0ff';
         this.game.physics.arcade.enable(this._rush);
-        //this.game.physics.ninja.enableAABB(this._rush);
         
         this._rush.body.bounce.y = 0.2;
         this._rush.body.gravity.y = 750;
@@ -178,7 +216,6 @@ var PlayScene = {
         
         if((this._rush.x < xMin && point.x < 0)|| (this._rush.x > xMax && point.x > 0))
             this._rush.body.velocity.x = 0;
-
     },    
  
 };

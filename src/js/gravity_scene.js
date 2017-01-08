@@ -1,20 +1,12 @@
 'use strict';
 
-var PlayerState = {'JUMP':0, 'RUN':1, 'FALLING':2, 'STOP':3}
-var Direction = {'LEFT':0, 'RIGHT':1, 'NONE':3}
-
 var map;
 var cursors;
 var jumptimer = 0;
 //Scena de juego.
 var GravityScene = {
     
-  _rush: {}, //player
-    _speed: 300, //velocidad del player
-    _jumpSpeed: 600, //velocidad de salto
-    _jumpHight: 150, //altura máxima del salto.
-    _playerState: PlayerState.STOP, //estado del player
-    _direction: Direction.NONE,  //dirección inicial del player. NONE es ninguna dirección.
+  _rush: {}, //player  
 
     //Método constructor...
   create: function () {      
@@ -136,10 +128,8 @@ var GravityScene = {
         //Start the Arcade Physics systems
         this.game.world.setBounds(0, 0, 3200, 1600);
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
-        //this.game.physics.startSystem(Phaser.Physics.NINJA);
         this.game.stage.backgroundColor = '#a9f0ff';
         this.game.physics.arcade.enable(this._rush);
-        //this.game.physics.ninja.enableAABB(this._rush);
         
         this._rush.body.bounce.y = 0.2;
         this._rush.body.gravity.y = -750;

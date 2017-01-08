@@ -4,7 +4,7 @@
 var PlayScene = require('./play_scene');
 var GameOver = require('./gameover_scene');
 var MenuScene = require('./menu_scene');
-var GravityScene = require('./gravity_scene');  //Nueva escena para el menu pausa
+var GravityScene = require('./gravity_scene');  //Nueva escena para el segundo nivel
 
 var BootScene = {
   preload: function () {
@@ -32,7 +32,8 @@ var PreloaderScene = {
       this.game.load.image('tiles', 'images/tileset.png');    
       this.game.load.tilemap('tilemap', 'images/map.json', null, Phaser.Tilemap.TILED_JSON);
       this.game.load.tilemap('tilemap2', 'images/map2.json', null, Phaser.Tilemap.TILED_JSON);
-      this.game.load.spritesheet('dude', 'images/dude.png', 32, 48);  
+      this.game.load.spritesheet('dude', 'images/dude.png', 32, 48); 
+      this.game.load.image('menuPausa', 'images/menuPausa.png', 250, 412);
     
       //Escuchar el evento onLoadComplete con el método loadComplete que el state 'play'
       this.game.load.onLoadComplete.add(this.loadComplete, this);
@@ -67,9 +68,6 @@ var wfconfig = {
  
 };
  
-//TODO 3.2 Cargar Google font cuando la página esté cargada con wfconfig.
-//TODO 3.3 La creación del juego y la asignación de los states se hará en el método init().
-
 function init(){
 var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game');
 
