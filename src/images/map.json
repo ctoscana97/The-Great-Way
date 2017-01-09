@@ -64,6 +64,10 @@
                  "height":117.030303030303,
                  "id":1,
                  "name":"StartPoint",
+                 "properties":
+                    {
+
+                    },
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -75,12 +79,46 @@
                  "height":110,
                  "id":2,
                  "name":"FinalPoint",
+                 "properties":
+                    {
+
+                    },
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":70,
                  "x":318,
                  "y":1302.66666666667
+                }, 
+                {
+                 "height":84.8484848484848,
+                 "id":5,
+                 "name":"Slime1 [2]",
+                 "properties":
+                    {
+
+                    },
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":118.181818181818,
+                 "x":2615.15151515152,
+                 "y":290.909090909091
+                }, 
+                {
+                 "height":69.6969696969697,
+                 "id":6,
+                 "name":"Torreta[3]",
+                 "properties":
+                    {
+
+                    },
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":69.6969696969697,
+                 "x":1530.30303030303,
+                 "y":566.666666666667
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -89,8 +127,12 @@
          "x":0,
          "y":0
         }],
- "nextobjectid":5,
+ "nextobjectid":7,
  "orientation":"orthogonal",
+ "properties":
+    {
+
+    },
  "renderorder":"right-down",
  "tileheight":64,
  "tilesets":[
@@ -102,6 +144,10 @@
          "imagewidth":1794,
          "margin":0,
          "name":"tileset",
+         "properties":
+            {
+
+            },
          "spacing":0,
          "tilecount":476,
          "tileheight":64,

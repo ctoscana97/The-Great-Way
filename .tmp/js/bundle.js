@@ -441,7 +441,9 @@ var PlayScene = {
       this.map.addTilesetImage('tileset', 'tiles');     
       //Objetos del mapa creados con Tiled
       var start = this.map.objects["Objects"][0];
-	  var end = this.map.objects["Objects"][1];	  
+	    var end = this.map.objects["Objects"][1];
+      var slimePos = this.map.objects["Objects"][2];	
+      var torretaPos = this.map.objects["Objects"][3];  
 
       //Creacion de las layers     
       this.backgroundLayer = this.map.createLayer('Capa Fondo');
