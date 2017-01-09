@@ -119,7 +119,7 @@ var GravityScene = {
     }
     ////////////////
 
-    if (this.cursors.up.isDown && hitPlatforms)
+    if (this.cursors.up.isDown && hitPlatforms && !this._rush.body.onFloor())
 
         {   //player is on the ground, so he is allowed to start a jump
                 this.jumptimer = this.game.time.time;
