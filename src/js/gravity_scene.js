@@ -5,13 +5,17 @@ var cursors;
 var jumptimer = 0;
 //textos
 var textStart;
+var textGravity;
+//GameObjects
+var winZone;
+var areaZone;
 //Pausa
 var pKey;
 var back; //backGround
 
+//Botones
 var buttonMenu;
 var buttonReanudar;
-
 var texto;
 var texto2;
 //Scena de juego.
@@ -48,6 +52,11 @@ var GravityScene = {
       this.map = this.game.add.tilemap('tilemap2');           
       this.map.addTilesetImage('tileset', 'tiles');
 
+      //GameObjects
+      var end = this.map.objects["Objects"][0];
+      var area = this.map.objects["Objects"][1];      
+      var textoPos = this.map.objects["Objects"][2];
+
       //Creacion de las layers     
       this.backgroundLayer = this.map.createLayer('Capa Fondo');
       this.water = this.map.createLayer('Agua');           
@@ -61,6 +70,11 @@ var GravityScene = {
       this.decorado.resizeWorld();
       this.water.resizeWorld();  
 
+      this.textStart = this.game.add.text(50, 250, "Woops!, alguien"  + "\n" + 
+        "se dejó la gravedad" + "\n" + "puesta al revés.");  
+      this.textGravity = this.game.add.text(textoPos.x, textoPos.y, "Tras esa barrera"  + "\n" + 
+        "de estrellas la" + "\n" + "gravedad se restaura.");
+
       //Personaje
       this._rush = this.game.add.sprite(20, 300, 'dude'); 
       this._rush.scale.setTo(1.2, -1.2);
@@ -73,16 +87,16 @@ var GravityScene = {
       this.death.visible = false;
 
       this.pKey = this.input.keyboard.addKey(Phaser.Keyboard.P);
-      this.pKey.onDown.add(this.togglePause, this);     
-   
-      this.textStart = this.game.add.text(50, 250, "Woops!, alguien"  + "\n" + 
-        "se dejó la gravedad" + "\n" + "puesta al revés.");    
+      this.pKey.onDown.add(this.togglePause, this);      
+
       back = this.game.add.sprite(this.game.camera.x, this.game.camera.y, 'back');
       back.visible = false;
+
+      this.winZone = new Phaser.Rectangle(end.x, end.y, end.width, end.height);
+      this.areaZone = new Phaser.Rectangle(area.x, area.y, area.width, area.height);
     
       this.configure();
-  },
-   
+  },   
 
     //IS called one per frame.
     update: function () {
@@ -118,7 +132,7 @@ var GravityScene = {
         this._rush.frame = 4;
     }
     ////////////////
-
+    //Salto ingravidez
     if (this.cursors.up.isDown && hitPlatforms && !this._rush.body.onFloor())
 
         {   //player is on the ground, so he is allowed to start a jump
@@ -142,9 +156,20 @@ var GravityScene = {
 
                 this.jumptimer = 0;
 
-            }
+            }      
+
 
         this.checkPlayerFell();
+
+        if(this.winZone.contains(this._rush.x + this._rush.width/2, 
+          this._rush.y + this._rush.height/2)){
+          this.game.state.start('gravityScene'); //Siguiente nivel
+        }
+        if(this.areaZone.contains(this._rush.x + this._rush.width/2, 
+          this._rush.y + this._rush.height/2)){
+             this._rush.body.gravity.y = 750;
+             this._rush.scale.setTo(1.2, 1.2);
+        }
     },
 
     togglePause: function(){
@@ -201,7 +226,7 @@ var GravityScene = {
     configure: function(){
         //Start the Arcade Physics systems
         this.game.world.setBounds(0, 0, 3200, 1600);
-        this.game.physics.startSystem(Phaser.Physics.ARCADE);
+        this.game.physics.startSystem(Phaser.Physics.ARCADE);
         this.game.stage.backgroundColor = '#a9f0ff';
         this.game.physics.arcade.enable(this._rush);
         
