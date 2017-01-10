@@ -82,7 +82,6 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game');
   game.state.add('play', PlayScene);
   game.state.add('gameOver', GameOver);
   game.state.add('gravityScene', GravityScene);
-
   game.state.start('boot');
 }
 

@@ -12,7 +12,9 @@ var areaZone;
 //Pausa
 var pKey;
 var back; //backGround
-
+//Salto
+//var potenciaExtra = 200;
+//var potenciaMinima = 325;
 //Botones
 var buttonMenu;
 var buttonReanudar;
@@ -136,24 +138,23 @@ var GravityScene = {
     //Salto ingravidez
     if (this.cursors.up.isDown && hitPlatforms && !this._rush.body.onFloor())
 
-        {   //player is on the ground, so he is allowed to start a jump
+        {   //Como el jugador esta en el suelo se le permite saltar.
                 this.jumptimer = this.game.time.time;
                 this._rush.body.velocity.y = 325;
 
         } else if (this.cursors.up.isDown && (this.jumptimer !== 0))
           
-          { //player is no longer on the ground, but is still holding the jump key
-                if ((this.game.time.time - this.jumptimer) > 600) { // player has been holding jump for over 600 millliseconds, it's time to stop him
+          { //El jugador no esta en tierra pero sigue pulsando el botón de salto.
+                if ((this.game.time.time - this.jumptimer) > 600) { //El jugador ya ha recibido más impulso de salto por más de 0'6 segundos que es el máximo que le he puesto.
 
                     this.jumptimer = 0;
 
-                } else { // player is allowed to jump higher, not yet 600 milliseconds of jumping
+                } else { // Todavía no ha llegado a los 0'6 segundos así que puede saltar más.
 
-                  //this._rush.body.velocity.y -= 15;//525
                   this._rush.body.velocity.y = 325+(200/(this.game.time.time - this.jumptimer));
                 }
 
-            } else if (this.jumptimer !== 0) { //reset jumptimer since the player is no longer holding the jump key
+            } else if (this.jumptimer !== 0) { //Resetea el contador del tiempo para que el jugador pueda volver a saltar.
 
                 this.jumptimer = 0;
 
@@ -164,12 +165,14 @@ var GravityScene = {
 
         if(this.winZone.contains(this._rush.x + this._rush.width/2, 
           this._rush.y + this._rush.height/2)){
-          this.game.state.start('gravityScene'); //Siguiente nivel
+          this.game.state.start('boot'); //Siguiente nivel
         }
         if(this.areaZone.contains(this._rush.x + this._rush.width/2, 
           this._rush.y + this._rush.height/2)){
              this._rush.body.gravity.y = 750;
              this._rush.scale.setTo(1.2, 1.2);
+             //potenciaMinima = -potenciaMinima;
+             //potenciaExtra = -potenciaExtra;
         }
     },
 

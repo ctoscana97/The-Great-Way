@@ -26,10 +26,11 @@ var GameOver = {
     
     //TODO 7 declarar el callback del boton.
     actionOnClick: function (){
-        if (this.game.currentlevel == 1){
-            this.game.state.start('play');
-        } else if (this.game.currentlevel == 2){
+        if (this.game.currentlevel == 2){
             this.game.state.start('gravityScene');
+        }
+        else {
+            this.game.state.start('play');
         }
     },
 
@@ -58,7 +59,9 @@ var areaZone;
 //Pausa
 var pKey;
 var back; //backGround
-
+//Salto
+//var potenciaExtra = 200;
+//var potenciaMinima = 325;
 //Botones
 var buttonMenu;
 var buttonReanudar;
@@ -182,24 +185,23 @@ var GravityScene = {
     //Salto ingravidez
     if (this.cursors.up.isDown && hitPlatforms && !this._rush.body.onFloor())
 
-        {   //player is on the ground, so he is allowed to start a jump
+        {   //Como el jugador esta en el suelo se le permite saltar.
                 this.jumptimer = this.game.time.time;
                 this._rush.body.velocity.y = 325;
 
         } else if (this.cursors.up.isDown && (this.jumptimer !== 0))
           
-          { //player is no longer on the ground, but is still holding the jump key
-                if ((this.game.time.time - this.jumptimer) > 600) { // player has been holding jump for over 600 millliseconds, it's time to stop him
+          { //El jugador no esta en tierra pero sigue pulsando el botón de salto.
+                if ((this.game.time.time - this.jumptimer) > 600) { //El jugador ya ha recibido más impulso de salto por más de 0'6 segundos que es el máximo que le he puesto.
 
                     this.jumptimer = 0;
 
-                } else { // player is allowed to jump higher, not yet 600 milliseconds of jumping
+                } else { // Todavía no ha llegado a los 0'6 segundos así que puede saltar más.
 
-                  //this._rush.body.velocity.y -= 15;//525
                   this._rush.body.velocity.y = 325+(200/(this.game.time.time - this.jumptimer));
                 }
 
-            } else if (this.jumptimer !== 0) { //reset jumptimer since the player is no longer holding the jump key
+            } else if (this.jumptimer !== 0) { //Resetea el contador del tiempo para que el jugador pueda volver a saltar.
 
                 this.jumptimer = 0;
 
@@ -210,12 +212,14 @@ var GravityScene = {
 
         if(this.winZone.contains(this._rush.x + this._rush.width/2, 
           this._rush.y + this._rush.height/2)){
-          this.game.state.start('gravityScene'); //Siguiente nivel
+          this.game.state.start('boot'); //Siguiente nivel
         }
         if(this.areaZone.contains(this._rush.x + this._rush.width/2, 
           this._rush.y + this._rush.height/2)){
              this._rush.body.gravity.y = 750;
              this._rush.scale.setTo(1.2, 1.2);
+             //potenciaMinima = -potenciaMinima;
+             //potenciaExtra = -potenciaExtra;
         }
     },
 
@@ -382,7 +386,6 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game');
   game.state.add('play', PlayScene);
   game.state.add('gameOver', GameOver);
   game.state.add('gravityScene', GravityScene);
-
   game.state.start('boot');
 }
 
@@ -434,6 +437,7 @@ var jumptimer = 0;
 var winZone;
 var platforms;
 var bullets;
+var Bullet;
 //textos
 var textStart;
 //Pausa
@@ -445,10 +449,6 @@ var buttonReanudar;
 
 var texto;
 var texto2;
-  function DestruyeBalas(suelo, bullet){
-    //NO FUNCIONA
-      bullet.destroy();
-    }
 //Scena de juego.
 var PlayScene = {
   menu: {},
@@ -458,13 +458,11 @@ var PlayScene = {
 
   //Método constructor...
     create: function () {    
-      //plataforma
+      //plataforma para el deslizamiento del slime
     platforms = this.game.add.group();
-
-    platforms.enableBody = true;
+	platforms.enableBody = true;
 
     var ledge = platforms.create(2400, 385, 'ground');
-
     ledge.body.immovable = true;
     ledge.scale.setTo(0.8, 0.9);
     ///BOTONES//////////////////////////////////
@@ -484,8 +482,7 @@ var PlayScene = {
       buttonReanudar.anchor.set(0.5);        
         texto2 = this.game.add.text(0, 0, "Resume");
         texto2.anchor.set(0.5);        
-        buttonReanudar.addChild(texto2);
-    ///////////////////////////////////////////  
+        buttonReanudar.addChild(texto2); 
 
       //Cargar del tilemap y asignacion del tileset
       this.game.load.tilemap('tilemap', 'images/map.json', null, Phaser.Tilemap.TILED_JSON);
@@ -504,9 +501,10 @@ var PlayScene = {
       this.water = this.map.createLayer('Agua');           
       this.death = this.map.createLayer('death'); //plano de muerte      
       this.decorado = this.map.createLayer('Capa Atravesable');
-      //torreta
+      //Inicializacion de la torreta.
       this.torreta = this.game.add.sprite(1450, 580, 'torreta');
-      disparanding = this.torreta.animations.add('stand', [0, 1, 2, 3], 1, true);
+      disparanding = this.torreta.animations.add('stand', [0, 1, 2, 3], 2, true);
+      //Llama al método Dispara en cada vuelta del loop de la animación.
       disparanding.onLoop.add(this.Dispara, this);
       this.groundLayer = this.map.createLayer('Capa Terreno');       
       //Redimension
@@ -544,7 +542,7 @@ var PlayScene = {
       this.pKey.onDown.add(this.togglePause, this);      
 
       this.configure();
-//slime
+//Inicialización del slime
     this.slime = this.game.add.sprite(slimePos.x, slimePos.y, 'slime');
     this.game.physics.arcade.enable(this.slime);
     this.slime.body.bounce.y = 0.2;
@@ -553,7 +551,7 @@ var PlayScene = {
     this.slime.body.collideWorldBounds = true;
     this.slime.animations.add('princi', [0, 1, 2, 3, 4], 5, true);
 
-//balas
+//Añadido del grupo balas.
 bullets = this.game.add.group();
 bullets.enableBody = true;
 
@@ -562,70 +560,67 @@ bullets.enableBody = true;
       
     //IS called one per frame.
     update: function () {
-
-      //Ocultar la interfaz del menu de pausa cuando el juego está moviendose
+      //Ocultar la interfaz del menu de pausa
     if (!this.game.physics.arcade.isPaused){
       buttonMenu.visible = false;
       buttonReanudar.visible = false;
       back.visible = false;
     }
-
+    //Reproducción de la animación del slime.
     this.slime.animations.play('princi');
+    //Reproducción de la animación de la torreta.
     this.torreta.animations.play('stand');
+    //Colisión entre el jugador y el terreno.
     var hitPlatforms = this.game.physics.arcade.collide(this._rush, this.groundLayer);
-    this.game.physics.arcade.collide(this._rush, this.slime, this.MatasOMueres, null, this);
-    this.game.physics.arcade.collide(this._rush, bullets, this.onPlayerFell, null, this);
-    //this.game.physics.arcade.overlap(this.groundLayer, bullets, DestruyeBalas, null, this);
-    this.game.physics.arcade.overlap(this.groundLayer, bullets);
-
-    //Movimiento del personaje
+    //Llama al método matas o mueres al colisionar con el slime.
+  	this.game.physics.arcade.collide(this._rush, this.slime, this.MatasOMueres, null, this);
+  	//Mata al personaje al tocar una bala.
+  	this.game.physics.arcade.collide(this._rush, bullets, this.onPlayerFell, null, this);
     this.cursors = this.game.input.keyboard.createCursorKeys();
-      // Reiniciamos el movimiento del personaje
+      //  Reset the players velocity (movement)
      this._rush.body.velocity.x = 0;
 
     if (this.cursors.left.isDown)
     {
-        // Movimiento a la izquierda
+        //  Move to the left
         this._rush.body.velocity.x = -150;
 
         this._rush.animations.play('left');
     }
     else if (this.cursors.right.isDown)
     {
-        // Movimiento a la derecha
+        //  Move to the right
         this._rush.body.velocity.x = 150;        
 
         this._rush.animations.play('right');
     }
     else
     {
-        //  frame quieto
+        //  Stand still
         this._rush.animations.stop();
 
         this._rush.frame = 4;
     }
-    ////////////////
-    //Salto del jugador
+   
     if (this.cursors.up.isDown && hitPlatforms && this._rush.body.onFloor())
 
-        {   //player is on the ground, so he is allowed to start a jump
+        {   //Como el jugador esta en el suelo se le permite saltar.
                 this.jumptimer = this.game.time.time;
                 this._rush.body.velocity.y = -325;
 
         } else if (this.cursors.up.isDown && (this.jumptimer !== 0))
           
-          { //player is no longer on the ground, but is still holding the jump key
-                if ((this.game.time.time - this.jumptimer) > 600) { // player has been holding jump for over 600 millliseconds, it's time to stop him
+          { //El jugador no esta en tierra pero sigue pulsando el botón de salto.
+                if ((this.game.time.time - this.jumptimer) > 600) { //El jugador ya ha recibido más impulso de salto por más de 0'6 segundos que es el máximo que le he puesto.
 
                     this.jumptimer = 0;
 
-                } else { // player is allowed to jump higher, not yet 600 milliseconds of jumping
+                } else { // Todavía no ha llegado a los 0'6 segundos así que puede saltar más.
 
-                  //this._rush.body.velocity.y -= 15;//525
-                  this._rush.body.velocity.y = -325-(200/(this.game.time.time - this.jumptimer));
+                  this._rush.body.velocity.y = -325-(200/(this.game.time.time - this.jumptimer));//200 partido del tiempo porque hasta 525 era lo máximo que se quería que saltase.
                 }
 
-            } else if (this.jumptimer !== 0) { //reset jumptimer since the player is no longer holding the jump key
+            } else if (this.jumptimer !== 0) { //Resetea el contador del tiempo para que el jugador pueda volver a saltar.
 
                 this.jumptimer = 0;
 
@@ -636,13 +631,10 @@ bullets.enableBody = true;
         //Para terminar el nivel:
         if(this.winZone.contains(this._rush.x + this._rush.width/2, this._rush.y + this._rush.height/2))
           this.game.state.start('gravityScene'); //Cargamos siguiente nivel
-
-
     this.game.physics.arcade.collide(this._rush, this.slime);
 
-    this.slime.update = function () {
-
-      this.game.physics.arcade.collide(this, platforms, function (slime, platform) {
+    //Hace que el slime recorra la plataforma en la que esté y gire antes de caerse para seguir recorriéndola indefinidamente.
+      this.game.physics.arcade.collide(this.slime, platforms, function (slime, platform) {
 
           if (slime.body.velocity.x > 0 && slime.x > platform.x + (platform.width - (slime.width + 5)) ||
                   slime.body.velocity.x < 0 && slime.x < platform.x) {
@@ -652,12 +644,23 @@ bullets.enableBody = true;
 
       });
 
-};
-//////////this.torreta = this.game.add.sprite(1450, 580, 'torreta');
-//////////this.torreta.animations.add('stand', [0, 1, 2, 3], 2, true);
+//Creación del prototipo balas.
+    Bullet = function(game, x, y) {
+    Phaser.Sprite.call(this, game, x, y, "bullet"); 
+    this.game.physics.enable(this, Phaser.Physics.ARCADE);
+    }
+
+    Bullet.prototype = Object.create(Phaser.Sprite.prototype);
+    Bullet.prototype.constructor = Bullet;
+
+    //Destrucción de la bala al tocar el terreno.
+    this.game.physics.arcade.collide(bullets, this.groundLayer, function (bullet) {
+        bullet.destroy();
+    });
+ 
 
     },
-
+    //Función que se llama al tocar al slime. Si le tocas por los lados mueres y si saltas encima le matas.
     MatasOMueres: function(){
 
       if (this._rush.body.touching.left || this._rush.body.touching.right){
@@ -667,29 +670,23 @@ bullets.enableBody = true;
       }
     },
 
+
+    //Constructora de la bala
     Dispara: function(){
-    var bullet = bullets.create(this.torreta.x + 10, this.torreta.y + 10, 'bullet');
-    //bullet.animations.add('avanza', [0,1], 10, true);
-    //this.game.physics.arcade.enable(bullet);
-    bullet.body.velocity.x = -80;
-    bullet.body.velocity.y = 30;
-
-    if (bullet.body.touching.down){
-      bullet.kill();
-    }
-        //bullets.add(bullet);
+        var bullet = new Bullet(this.game, this.torreta.x + 10, this.torreta.y + 10);
+        bullet.body.velocity.y = 80;
+        bullet.body.velocity.x = -150;
+        bullets.add(bullet);
     },
-
     togglePause: function(){
-      //Destruimos los anteriores botones antes de crear los nuevos, para actualizar su posicion
-      buttonMenu.destroy(); 
+      buttonMenu.destroy();
       buttonReanudar.destroy();
       back.visible = false;
 
       back = this.game.add.sprite(this.game.camera.x, this.game.camera.y, 'back');
         back.visible = true;
 
-      //Boton 1
+        //Boton 1
       buttonMenu = this.game.add.button(this.game.camera.x+400, this.game.camera.y+350, 
                                           'button', 
                                           this.volverMenu, 
@@ -711,11 +708,10 @@ bullets.enableBody = true;
         buttonReanudar.addChild(texto2);
       buttonReanudar.visible = true;
 
-      //Desactivamos las físicas para paralizar el mundo      
       this.game.physics.arcade.isPaused = (this.game.physics.arcade.isPaused) ? false : true;
     },
     volverMenu: function (){
-        this.game.state.start('menu');
+        this.game.state.start('gravityScene');
 
     },
     Reanudar: function(){
@@ -738,7 +734,6 @@ bullets.enableBody = true;
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
         this.game.stage.backgroundColor = '#a9f0ff';
         this.game.physics.arcade.enable(this._rush);
-        this.game.currentlevel = 1;
         
         this._rush.body.bounce.y = 0.2;
         this._rush.body.gravity.y = 750;
