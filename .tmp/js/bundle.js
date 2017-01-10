@@ -323,10 +323,14 @@ var PreloaderScene = {
     
     this.load.onLoadStart.add(this.loadStart, this);
     //Carga de tilemap y animaciones    
-      this.game.load.image('tiles', 'images/tileset.png');    
+      this.game.load.image('tiles', 'images/tileset.png');
+      this.game.load.image('ground', 'images/platform.png');    
       this.game.load.tilemap('tilemap', 'images/map.json', null, Phaser.Tilemap.TILED_JSON);
       this.game.load.tilemap('tilemap2', 'images/map2.json', null, Phaser.Tilemap.TILED_JSON);
-      this.game.load.spritesheet('dude', 'images/dude.png', 32, 48); 
+      this.game.load.spritesheet('dude', 'images/dude.png', 32, 48);
+      this.game.load.spritesheet('slime', 'images/slime.png', 35, 25);
+      this.game.load.spritesheet('torreta', 'images/torreta.png', 100.5, 67);
+      this.game.load.spritesheet('bullet', 'images/fuego.png', 20.5, 20);
       this.game.load.image('menuPausa', 'images/menuPausa.png', 250, 412);
       this.game.load.image('back', 'images/back.png', 800, 600);
     
@@ -417,9 +421,12 @@ module.exports = MenuScene;
 
 var map;
 var cursors;
+var disparanding;
 var jumptimer = 0;
 //GameObjects
 var winZone;
+var platforms;
+var bullets;
 //textos
 var textStart;
 //Pausa
@@ -431,15 +438,30 @@ var buttonReanudar;
 
 var texto;
 var texto2;
+  function DestruyeBalas(suelo, bullet){
+    //NO FUNCIONA
+      bullet.destroy();
+    }
 //Scena de juego.
 var PlayScene = {
-	menu: {},
+  menu: {},
     _rush: {}, //player
+    slime: {},
+    torreta: {},
 
-	//Método constructor...
-  	create: function () {    
-  	///BOTONES//////////////////////////////////
-		buttonMenu = this.game.add.button(400, 450, 
+  //Método constructor...
+    create: function () {    
+      //plataforma
+    platforms = this.game.add.group();
+
+    platforms.enableBody = true;
+
+    var ledge = platforms.create(2400, 385, 'ground');
+
+    ledge.body.immovable = true;
+    ledge.scale.setTo(0.8, 0.9);
+    ///BOTONES//////////////////////////////////
+    buttonMenu = this.game.add.button(400, 450, 
                                           'button', 
                                           this.volverMenu, 
                                           this, 2, 1, 0);
@@ -452,11 +474,11 @@ var PlayScene = {
                                           'button', 
                                           this.Reanudar, 
                                           this, 2, 1, 0);
-    	buttonReanudar.anchor.set(0.5);        
+      buttonReanudar.anchor.set(0.5);        
         texto2 = this.game.add.text(0, 0, "Resume");
         texto2.anchor.set(0.5);        
         buttonReanudar.addChild(texto2);
-  	///////////////////////////////////////////  
+    ///////////////////////////////////////////  
 
       //Cargar del tilemap y asignacion del tileset
       this.game.load.tilemap('tilemap', 'images/map.json', null, Phaser.Tilemap.TILED_JSON);
@@ -466,8 +488,8 @@ var PlayScene = {
       this.map.addTilesetImage('tileset', 'tiles');     
       //Objetos del mapa creados con Tiled
       var start = this.map.objects["Objects"][0];
-	  var end = this.map.objects["Objects"][1];
-      var slimePos = this.map.objects["Objects"][2];	
+      var end = this.map.objects["Objects"][1];
+      var slimePos = this.map.objects["Objects"][2];  
       var torretaPos = this.map.objects["Objects"][3];  
 
       //Creacion de las layers     
@@ -475,6 +497,10 @@ var PlayScene = {
       this.water = this.map.createLayer('Agua');           
       this.death = this.map.createLayer('death'); //plano de muerte      
       this.decorado = this.map.createLayer('Capa Atravesable');
+      //torreta
+      this.torreta = this.game.add.sprite(1450, 580, 'torreta');
+      disparanding = this.torreta.animations.add('stand', [0, 1, 2, 3], 1, true);
+      disparanding.onLoop.add(this.Dispara, this);
       this.groundLayer = this.map.createLayer('Capa Terreno');       
       //Redimension
       this.groundLayer.resizeWorld(); //resize world and adjust to the screen
@@ -485,14 +511,14 @@ var PlayScene = {
       
       //Texto de tutorial
       this.textStart = this.game.add.text(50, 450, "Bienvenido!, recuerda que"  + "\n" + 
-      	"puedes saltar diferente distancia" + "\n" + "dependiendo de cuanto pulses el botón de salto.");
+        "puedes saltar diferente distancia" + "\n" + "dependiendo de cuanto pulses el botón de salto.");
 
       //Elementos de menu de pausa
       back = this.game.add.sprite(this.game.camera.x, this.game.camera.y, 'back');
       back.visible = false;
 
       //Personaje      
-      this._rush = this.game.add.sprite(start.x, start.y, 'dude'); 
+      this._rush = this.game.add.sprite(start.x, start.y, 'dude');//(start.x, start.y, 'dude'); 
       this._rush.scale.setTo(1.2, 1.2);
       //animaciones     
       this._rush.animations.add('left', [0, 1, 2, 3], 10, true);
@@ -511,19 +537,39 @@ var PlayScene = {
       this.pKey.onDown.add(this.togglePause, this);      
 
       this.configure();
+//slime
+    this.slime = this.game.add.sprite(slimePos.x, slimePos.y, 'slime');
+    this.game.physics.arcade.enable(this.slime);
+    this.slime.body.bounce.y = 0.2;
+    this.slime.body.gravity.y = 300;
+    this.slime.body.velocity.x = 80;
+    this.slime.body.collideWorldBounds = true;
+    this.slime.animations.add('princi', [0, 1, 2, 3, 4], 5, true);
+
+//balas
+bullets = this.game.add.group();
+bullets.enableBody = true;
+
+
   },
       
     //IS called one per frame.
     update: function () {
-    	//Ocultar la interfaz del menu de pausa
+      //Ocultar la interfaz del menu de pausa
     if (!this.game.physics.arcade.isPaused){
-    	buttonMenu.visible = false;
-  	 	buttonReanudar.visible = false;
-    	back.visible = false;
+      buttonMenu.visible = false;
+      buttonReanudar.visible = false;
+      back.visible = false;
     }
 
-     var hitPlatforms = this.game.physics.arcade.collide(this._rush, this.groundLayer);
-     this.cursors = this.game.input.keyboard.createCursorKeys();
+    this.slime.animations.play('princi');
+    this.torreta.animations.play('stand');
+    var hitPlatforms = this.game.physics.arcade.collide(this._rush, this.groundLayer);
+  this.game.physics.arcade.collide(this._rush, this.slime, this.MatasOMueres, null, this);
+  this.game.physics.arcade.collide(this._rush, bullets, this.onPlayerFell, null, this);
+  //this.game.physics.arcade.overlap(this.groundLayer, bullets, DestruyeBalas, null, this);
+  this.game.physics.arcade.overlap(this.groundLayer, bullets);
+    this.cursors = this.game.input.keyboard.createCursorKeys();
       //  Reset the players velocity (movement)
      this._rush.body.velocity.x = 0;
 
@@ -557,16 +603,16 @@ var PlayScene = {
                 this._rush.body.velocity.y = -325;
 
         } else if (this.cursors.up.isDown && (this.jumptimer !== 0))
-        	
-         	{ //player is no longer on the ground, but is still holding the jump key
+          
+          { //player is no longer on the ground, but is still holding the jump key
                 if ((this.game.time.time - this.jumptimer) > 600) { // player has been holding jump for over 600 millliseconds, it's time to stop him
 
                     this.jumptimer = 0;
 
                 } else { // player is allowed to jump higher, not yet 600 milliseconds of jumping
 
-                	//this._rush.body.velocity.y -= 15;//525
-                	this._rush.body.velocity.y = -325-(200/(this.game.time.time - this.jumptimer));
+                  //this._rush.body.velocity.y -= 15;//525
+                  this._rush.body.velocity.y = -325-(200/(this.game.time.time - this.jumptimer));
                 }
 
             } else if (this.jumptimer !== 0) { //reset jumptimer since the player is no longer holding the jump key
@@ -579,46 +625,85 @@ var PlayScene = {
 
         //Para terminar el nivel:
         if(this.winZone.contains(this._rush.x + this._rush.width/2, this._rush.y + this._rush.height/2))
-        	this.game.state.start('gravityScene'); //Cargamos siguiente nivel
-    },    
+          this.game.state.start('gravityScene'); //Cargamos siguiente nivel
+    this.game.physics.arcade.collide(this._rush, this.slime);
+
+    this.slime.update = function () {
+
+      this.game.physics.arcade.collide(this, platforms, function (slime, platform) {
+
+          if (slime.body.velocity.x > 0 && slime.x > platform.x + (platform.width - (slime.width + 5)) ||
+                  slime.body.velocity.x < 0 && slime.x < platform.x) {
+              slime.body.velocity.x *= -1; 
+          }
+            slime.body.velocity.y = -80;
+
+      });
+
+};
+//////////this.torreta = this.game.add.sprite(1450, 580, 'torreta');
+//////////this.torreta.animations.add('stand', [0, 1, 2, 3], 2, true);
+
+    },
+
+    MatasOMueres: function(){
+
+      if (this._rush.body.touching.left || this._rush.body.touching.right){
+          this.game.state.start('gameOver');        
+      } else if (this._rush.body.touching.down){
+          this.slime.kill();
+      }
+    },
+    Dispara: function(){
+    var bullet = bullets.create(this.torreta.x + 10, this.torreta.y + 10, 'bullet');
+    //bullet.animations.add('avanza', [0,1], 10, true);
+    //this.game.physics.arcade.enable(bullet);
+    bullet.body.velocity.x = -80;
+    bullet.body.velocity.y = 30;
+
+    if (bullet.body.touching.down){
+      bullet.kill();
+    }
+        //bullets.add(bullet);
+    },
     togglePause: function(){
-    	buttonMenu.destroy();
-    	buttonReanudar.destroy();
-    	back.visible = false;
+      buttonMenu.destroy();
+      buttonReanudar.destroy();
+      back.visible = false;
 
-    	back = this.game.add.sprite(this.game.camera.x, this.game.camera.y, 'back');
-      	back.visible = true;
+      back = this.game.add.sprite(this.game.camera.x, this.game.camera.y, 'back');
+        back.visible = true;
 
-      	//Boton 1
-    	buttonMenu = this.game.add.button(this.game.camera.x+400, this.game.camera.y+350, 
+        //Boton 1
+      buttonMenu = this.game.add.button(this.game.camera.x+400, this.game.camera.y+350, 
                                           'button', 
                                           this.volverMenu, 
                                           this, 2, 1, 0);
-    	buttonMenu.anchor.set(0.5);        
+      buttonMenu.anchor.set(0.5);        
         texto = this.game.add.text(0, 0, "Return Menu");
         texto.anchor.set(0.5);        
         buttonMenu.addChild(texto);
-    	buttonMenu.visible = true;
+      buttonMenu.visible = true;
 
-    	//Boton 2
-    	buttonReanudar = this.game.add.button(this.game.camera.x+400, this.game.camera.y+250, 
+      //Boton 2
+      buttonReanudar = this.game.add.button(this.game.camera.x+400, this.game.camera.y+250, 
                                           'button', 
                                           this.Reanudar, 
                                           this, 2, 1, 0);
-    	buttonReanudar.anchor.set(0.5);        
+      buttonReanudar.anchor.set(0.5);        
         texto2 = this.game.add.text(0, 0, "Resume");
         texto2.anchor.set(0.5);        
         buttonReanudar.addChild(texto2);
-    	buttonReanudar.visible = true;
+      buttonReanudar.visible = true;
 
-    	this.game.physics.arcade.isPaused = (this.game.physics.arcade.isPaused) ? false : true;
+      this.game.physics.arcade.isPaused = (this.game.physics.arcade.isPaused) ? false : true;
     },
     volverMenu: function (){
         this.game.state.start('gravityScene');
 
     },
     Reanudar: function(){
-    	this.game.physics.arcade.isPaused = (this.game.physics.arcade.isPaused) ? false : true;
+      this.game.physics.arcade.isPaused = (this.game.physics.arcade.isPaused) ? false : true;
     },
 
     onPlayerFell: function(){

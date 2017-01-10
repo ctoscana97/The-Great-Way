@@ -29,10 +29,14 @@ var PreloaderScene = {
     
     this.load.onLoadStart.add(this.loadStart, this);
     //Carga de tilemap y animaciones    
-      this.game.load.image('tiles', 'images/tileset.png');    
+      this.game.load.image('tiles', 'images/tileset.png');
+      this.game.load.image('ground', 'images/platform.png');    
       this.game.load.tilemap('tilemap', 'images/map.json', null, Phaser.Tilemap.TILED_JSON);
       this.game.load.tilemap('tilemap2', 'images/map2.json', null, Phaser.Tilemap.TILED_JSON);
-      this.game.load.spritesheet('dude', 'images/dude.png', 32, 48); 
+      this.game.load.spritesheet('dude', 'images/dude.png', 32, 48);
+      this.game.load.spritesheet('slime', 'images/slime.png', 35, 25);
+      this.game.load.spritesheet('torreta', 'images/torreta.png', 100.5, 67);
+      this.game.load.spritesheet('bullet', 'images/fuego.png', 20.5, 20);
       this.game.load.image('menuPausa', 'images/menuPausa.png', 250, 412);
       this.game.load.image('back', 'images/back.png', 800, 600);
     
