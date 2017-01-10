@@ -292,7 +292,7 @@ bullets.enableBody = true;
       this.game.physics.arcade.isPaused = (this.game.physics.arcade.isPaused) ? false : true;
     },
     volverMenu: function (){
-        this.game.state.start('gravityScene');
+        this.game.state.start('menu');
 
     },
     Reanudar: function(){

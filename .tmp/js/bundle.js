@@ -252,7 +252,7 @@ var GravityScene = {
       this.game.physics.arcade.isPaused = (this.game.physics.arcade.isPaused) ? false : true;
     },
     volverMenu: function (){
-        this.game.state.start('gravityScene');
+        this.game.state.start('boot');
 
     },
     Reanudar: function(){
@@ -396,16 +396,17 @@ window.onload = function () {
 var MenuScene = {
     create: function () {
         
-        var logo = this.game.add.sprite(this.game.world.centerX, 
-                                        this.game.world.centerY, 
+        var logo = this.game.add.sprite(this.game.camera.x+400, 
+                                        this.game.camera.y+300, 
                                         'logo');
         logo.anchor.setTo(0.5, 0.5);
-        var buttonStart = this.game.add.button(this.game.world.centerX, 
-                                               this.game.world.centerY, 
+        var buttonStart = this.game.add.button(this.game.camera.x+400,
+                                               this.game.camera.y+350, 
                                                'button', 
                                                this.actionOnClick, 
                                                this, 2, 1, 0);
         buttonStart.anchor.set(0.5);
+
         var textStart = this.game.add.text(0, 0, "Start");
         textStart.font = 'Sniglet';
         textStart.anchor.set(0.5);
@@ -714,7 +715,7 @@ bullets.enableBody = true;
       this.game.physics.arcade.isPaused = (this.game.physics.arcade.isPaused) ? false : true;
     },
     volverMenu: function (){
-        this.game.state.start('gravityScene');
+        this.game.state.start('menu');
 
     },
     Reanudar: function(){
