@@ -139,7 +139,8 @@ bullets.enableBody = true;
       
     //IS called one per frame.
     update: function () {
-      //Ocultar la interfaz del menu de pausa
+
+      //Ocultar la interfaz del menu de pausa cuando el juego está moviendose
     if (!this.game.physics.arcade.isPaused){
       buttonMenu.visible = false;
       buttonReanudar.visible = false;
@@ -149,37 +150,39 @@ bullets.enableBody = true;
     this.slime.animations.play('princi');
     this.torreta.animations.play('stand');
     var hitPlatforms = this.game.physics.arcade.collide(this._rush, this.groundLayer);
-  this.game.physics.arcade.collide(this._rush, this.slime, this.MatasOMueres, null, this);
-  this.game.physics.arcade.collide(this._rush, bullets, this.onPlayerFell, null, this);
-  //this.game.physics.arcade.overlap(this.groundLayer, bullets, DestruyeBalas, null, this);
-  this.game.physics.arcade.overlap(this.groundLayer, bullets);
+    this.game.physics.arcade.collide(this._rush, this.slime, this.MatasOMueres, null, this);
+    this.game.physics.arcade.collide(this._rush, bullets, this.onPlayerFell, null, this);
+    //this.game.physics.arcade.overlap(this.groundLayer, bullets, DestruyeBalas, null, this);
+    this.game.physics.arcade.overlap(this.groundLayer, bullets);
+
+    //Movimiento del personaje
     this.cursors = this.game.input.keyboard.createCursorKeys();
-      //  Reset the players velocity (movement)
+      // Reiniciamos el movimiento del personaje
      this._rush.body.velocity.x = 0;
 
     if (this.cursors.left.isDown)
     {
-        //  Move to the left
+        // Movimiento a la izquierda
         this._rush.body.velocity.x = -150;
 
         this._rush.animations.play('left');
     }
     else if (this.cursors.right.isDown)
     {
-        //  Move to the right
+        // Movimiento a la derecha
         this._rush.body.velocity.x = 150;        
 
         this._rush.animations.play('right');
     }
     else
     {
-        //  Stand still
+        //  frame quieto
         this._rush.animations.stop();
 
         this._rush.frame = 4;
     }
     ////////////////
-   
+    //Salto del jugador
     if (this.cursors.up.isDown && hitPlatforms && this._rush.body.onFloor())
 
         {   //player is on the ground, so he is allowed to start a jump
@@ -210,6 +213,8 @@ bullets.enableBody = true;
         //Para terminar el nivel:
         if(this.winZone.contains(this._rush.x + this._rush.width/2, this._rush.y + this._rush.height/2))
           this.game.state.start('gravityScene'); //Cargamos siguiente nivel
+
+
     this.game.physics.arcade.collide(this._rush, this.slime);
 
     this.slime.update = function () {
@@ -238,6 +243,7 @@ bullets.enableBody = true;
           this.slime.kill();
       }
     },
+
     Dispara: function(){
     var bullet = bullets.create(this.torreta.x + 10, this.torreta.y + 10, 'bullet');
     //bullet.animations.add('avanza', [0,1], 10, true);
@@ -250,15 +256,17 @@ bullets.enableBody = true;
     }
         //bullets.add(bullet);
     },
+
     togglePause: function(){
-      buttonMenu.destroy();
+      //Destruimos los anteriores botones antes de crear los nuevos, para actualizar su posicion
+      buttonMenu.destroy(); 
       buttonReanudar.destroy();
       back.visible = false;
 
       back = this.game.add.sprite(this.game.camera.x, this.game.camera.y, 'back');
         back.visible = true;
 
-        //Boton 1
+      //Boton 1
       buttonMenu = this.game.add.button(this.game.camera.x+400, this.game.camera.y+350, 
                                           'button', 
                                           this.volverMenu, 
@@ -280,6 +288,7 @@ bullets.enableBody = true;
         buttonReanudar.addChild(texto2);
       buttonReanudar.visible = true;
 
+      //Desactivamos las físicas para paralizar el mundo      
       this.game.physics.arcade.isPaused = (this.game.physics.arcade.isPaused) ? false : true;
     },
     volverMenu: function (){
@@ -306,6 +315,7 @@ bullets.enableBody = true;
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
         this.game.stage.backgroundColor = '#a9f0ff';
         this.game.physics.arcade.enable(this._rush);
+        this.game.currentlevel = 1;
         
         this._rush.body.bounce.y = 0.2;
         this._rush.body.gravity.y = 750;

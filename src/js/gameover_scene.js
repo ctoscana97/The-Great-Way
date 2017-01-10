@@ -25,7 +25,11 @@ var GameOver = {
     
     //TODO 7 declarar el callback del boton.
     actionOnClick: function (){
-        this.game.state.start('preloader');
+        if (this.game.currentlevel == 1){
+            this.game.state.start('play');
+        } else if (this.game.currentlevel == 2){
+            this.game.state.start('gravityScene');
+        }
     },
 
     volverMenu: function (){

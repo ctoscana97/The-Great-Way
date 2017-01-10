@@ -132,6 +132,7 @@ var GravityScene = {
         this._rush.frame = 4;
     }
     ////////////////
+
     //Salto ingravidez
     if (this.cursors.up.isDown && hitPlatforms && !this._rush.body.onFloor())
 
@@ -229,6 +230,7 @@ var GravityScene = {
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
         this.game.stage.backgroundColor = '#a9f0ff';
         this.game.physics.arcade.enable(this._rush);
+        this.game.currentlevel = 2;
         
         this._rush.body.bounce.y = 0.2;
         this._rush.body.gravity.y = -750;
