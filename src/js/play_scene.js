@@ -9,6 +9,8 @@ var disparanding;
 var jumptimer = 0;
 //GameObjects
 var winZone;
+var propulsion1;
+var propulsion2;
 var platforms;
 var bullets;
 var Bullet;
@@ -68,7 +70,11 @@ var PlayScene = {
       var start = this.map.objects["Objects"][0];
       var end = this.map.objects["Objects"][1];
       var slimePos = this.map.objects["Objects"][2];  
-      var torretaPos = this.map.objects["Objects"][3];  
+      var torretaPos = this.map.objects["Objects"][3];
+      var slimePos2 = this.map.objects["Objects"][4]; 
+      var slimePos3 = this.map.objects["Objects"][5]; 
+      var setaPos1 =  this.map.objects["Objects"][6];
+      var setaPos2 =  this.map.objects["Objects"][7];  
 
       //Creacion de las layers     
       this.backgroundLayer = this.map.createLayer('Capa Fondo');
@@ -110,6 +116,9 @@ var PlayScene = {
 
       //Zona de Final del nivel
       this.winZone = new Phaser.Rectangle(end.x, end.y, end.width, end.height);
+      //Zonas de impulso
+      this.propulsion1 = new Phaser.Rectangle(setaPos1.x, setaPos1.y, setaPos1.width, setaPos1.height);
+      this.propulsion2 = new Phaser.Rectangle(setaPos2.x, setaPos2.y, setaPos2.width, setaPos2.height);
 
       //tecla de Pausa
       this.pKey = this.input.keyboard.addKey(Phaser.Keyboard.P);
@@ -203,9 +212,19 @@ bullets.enableBody = true;
         this.checkPlayerFell();
 
         //Para terminar el nivel:
-        if(this.winZone.contains(this._rush.x + this._rush.width/2, this._rush.y + this._rush.height/2))
+        if(this.winZone.contains(this._rush.x + this._rush.width/2, this._rush.y + this._rush.height/2)){
           this.game.state.start('gravityScene'); //Cargamos siguiente nivel
-    this.game.physics.arcade.collide(this._rush, this.slime);
+        }
+
+        //Zonas de propulsion
+        if(this.propulsion1.contains(this._rush.x + this._rush.width/2, this._rush.y + this._rush.height/2)){
+          //this._rush.body.velocity.y = -1200; //(por implementar)
+          //this._rush.body.velocity.x = 500;
+        }
+
+
+
+        this.game.physics.arcade.collide(this._rush, this.slime);
 
     //Hace que el slime recorra la plataforma en la que esté y gire antes de caerse para seguir recorriéndola indefinidamente.
       this.game.physics.arcade.collide(this.slime, platforms, function (slime, platform) {
@@ -328,3 +347,30 @@ bullets.enableBody = true;
 };
 
 module.exports = PlayScene;
+
+/*
+ if (this.cursors.up.isDown && hitPlatforms && this._rush.body.onFloor())
+
+        {   //player is on the ground, so he is allowed to start a jump
+                this.jumptimer = this.game.time.time;
+                this._rush.body.velocity.y = -1000;
+
+        } else if (this.cursors.up.isDown && (this.jumptimer !== 0))
+          
+          { //player is no longer on the ground, but is still holding the jump key
+                if ((this.game.time.time - this.jumptimer) > 325) { // player has been holding jump for over 600 millliseconds, it's time to stop him
+
+                    this.jumptimer = 0;
+
+                } else { // player is allowed to jump higher, not yet 600 milliseconds of jumping
+
+                  //this._rush.body.velocity.y -= 15;//525
+                  this._rush.body.velocity.y = -400-(120/(this.game.time.time - this.jumptimer));
+                }
+
+            } else if (this.jumptimer !== 0) { //reset jumptimer since the player is no longer holding the jump key
+
+                this.jumptimer = 0;
+
+            } 
+*/
