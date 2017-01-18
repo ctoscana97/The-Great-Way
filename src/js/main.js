@@ -39,6 +39,7 @@ var PreloaderScene = {
       this.game.load.spritesheet('bullet', 'images/fuego.png', 20.5, 20);
       this.game.load.image('menuPausa', 'images/menuPausa.png', 250, 412);
       this.game.load.image('back', 'images/back.png', 800, 600);
+      this.game.load.image('clouds', 'images/clouds.png', 384, 288);
     
       //Escuchar el evento onLoadComplete con el método loadComplete que el state 'play'
       this.game.load.onLoadComplete.add(this.loadComplete, this);

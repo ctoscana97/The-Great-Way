@@ -343,6 +343,7 @@ var PreloaderScene = {
       this.game.load.spritesheet('bullet', 'images/fuego.png', 20.5, 20);
       this.game.load.image('menuPausa', 'images/menuPausa.png', 250, 412);
       this.game.load.image('back', 'images/back.png', 800, 600);
+      this.game.load.image('clouds', 'images/clouds.png', 384, 288);
     
       //Escuchar el evento onLoadComplete con el método loadComplete que el state 'play'
       this.game.load.onLoadComplete.add(this.loadComplete, this);
@@ -400,7 +401,7 @@ var MenuScene = {
     create: function () {
         
         var logo = this.game.add.sprite(this.game.camera.x+400, 
-                                        this.game.camera.y+300, 
+                                        this.game.camera.y+350, 
                                         'logo');
         logo.anchor.setTo(0.5, 0.5);
         var buttonStart = this.game.add.button(this.game.camera.x+400,
@@ -435,9 +436,14 @@ var disparanding;
 var jumptimer = 0;
 //GameObjects
 var winZone;
+var propulsion1;
+var propulsion2;
+var finalZone;
+var finalZone2;
 var platforms;
 var bullets;
 var Bullet;
+var nubes;
 //textos
 var textStart;
 //Pausa
@@ -455,12 +461,18 @@ var PlayScene = {
     _rush: {}, //player
     slime: {},
     torreta: {},
+    nube: {},
+    nube2: {},
+    nube3: {},
 
   //Método constructor...
     create: function () {    
       //plataforma para el deslizamiento del slime
     platforms = this.game.add.group();
 	platforms.enableBody = true;
+
+	nubes = this.game.add.group();
+	nubes.enableBody = true;
 
     var ledge = platforms.create(2400, 385, 'ground');
     ledge.body.immovable = true;
@@ -485,8 +497,8 @@ var PlayScene = {
         buttonReanudar.addChild(texto2); 
 
       //Cargar del tilemap y asignacion del tileset
-      this.game.load.tilemap('tilemap', 'images/map.json', null, Phaser.Tilemap.TILED_JSON);
-      this.game.load.image('tiles', 'images/tileset.png',  null, Phaser.Tilemap.TILED_JSON); 
+      //this.game.load.tilemap('tilemap', 'images/map.json', null, Phaser.Tilemap.TILED_JSON);
+      //this.game.load.image('tiles', 'images/tileset.png',  null, Phaser.Tilemap.TILED_JSON); 
 
       this.map = this.game.add.tilemap('tilemap');           
       this.map.addTilesetImage('tileset', 'tiles');     
@@ -494,9 +506,26 @@ var PlayScene = {
       var start = this.map.objects["Objects"][0];
       var end = this.map.objects["Objects"][1];
       var slimePos = this.map.objects["Objects"][2];  
-      var torretaPos = this.map.objects["Objects"][3];  
+      var torretaPos = this.map.objects["Objects"][3];
+      var slimePos2 = this.map.objects["Objects"][4]; 
+      var slimePos3 = this.map.objects["Objects"][5]; 
+      var setaPos1 =  this.map.objects["Objects"][6];
+      var setaPos2 =  this.map.objects["Objects"][7];  
+      var finalPos =  this.map.objects["Objects"][8];
+      var finalPos2 =  this.map.objects["Objects"][9]; 
 
-      //Creacion de las layers     
+    
+    //NUBES
+	    this.nube = this.game.add.sprite(400, slimePos.y, 'clouds');
+	    this.game.physics.arcade.enable(this.nube);
+	    this.nube.body.velocity.x = -30;
+	    this.nube2 = this.game.add.sprite(1200, start.y-100, 'clouds');
+	    this.game.physics.arcade.enable(this.nube2);
+	    this.nube2.body.velocity.x = -30;
+	    this.nube3 = this.game.add.sprite(2000, setaPos1.y-100, 'clouds');
+	    this.game.physics.arcade.enable(this.nube3);
+	    this.nube3.body.velocity.x = -30;
+    //LAYERS
       this.backgroundLayer = this.map.createLayer('Capa Fondo');
       this.water = this.map.createLayer('Agua');           
       this.death = this.map.createLayer('death'); //plano de muerte      
@@ -536,6 +565,12 @@ var PlayScene = {
 
       //Zona de Final del nivel
       this.winZone = new Phaser.Rectangle(end.x, end.y, end.width, end.height);
+      //Zonas de impulso
+      this.propulsion1 = new Phaser.Rectangle(setaPos1.x, setaPos1.y, setaPos1.width, setaPos1.height);
+      this.propulsion2 = new Phaser.Rectangle(setaPos2.x, setaPos2.y, setaPos2.width, setaPos2.height);
+      //Zonas colision nubes
+      this.finalZone = new Phaser.Rectangle(finalPos.x, finalPos.y, finalPos.width, finalPos.height);
+      this.finalZone2 = new Phaser.Rectangle(finalPos2.x, finalPos2.y, finalPos2.width, finalPos2.height);
 
       //tecla de Pausa
       this.pKey = this.input.keyboard.addKey(Phaser.Keyboard.P);
@@ -550,6 +585,8 @@ var PlayScene = {
     this.slime.body.velocity.x = 80;
     this.slime.body.collideWorldBounds = true;
     this.slime.animations.add('princi', [0, 1, 2, 3, 4], 5, true);
+
+   
 
 //Añadido del grupo balas.
 bullets = this.game.add.group();
@@ -629,9 +666,23 @@ bullets.enableBody = true;
         this.checkPlayerFell();
 
         //Para terminar el nivel:
-        if(this.winZone.contains(this._rush.x + this._rush.width/2, this._rush.y + this._rush.height/2))
+        if(this.winZone.contains(this._rush.x + this._rush.width/2, this._rush.y + this._rush.height/2)){
           this.game.state.start('gravityScene'); //Cargamos siguiente nivel
-    this.game.physics.arcade.collide(this._rush, this.slime);
+        }
+
+        //Zonas de propulsion
+        if(this.propulsion1.contains(this._rush.x + this._rush.width/2, this._rush.y + this._rush.height/2)){
+          //this._rush.body.velocity.y = -1200; //(por implementar)
+          //this._rush.body.velocity.x = 500;
+        }
+
+         if(this.finalZone.contains(this.nube.x + this.nube.width/2, this.nube.y + this.nube.height/2)){
+        		this.nube.x = this.finalZone2.x;
+        }
+
+
+
+        this.game.physics.arcade.collide(this._rush, this.slime);
 
     //Hace que el slime recorra la plataforma en la que esté y gire antes de caerse para seguir recorriéndola indefinidamente.
       this.game.physics.arcade.collide(this.slime, platforms, function (slime, platform) {
@@ -712,6 +763,7 @@ bullets.enableBody = true;
     },
     volverMenu: function (){
         this.game.state.start('gravityScene');
+        //this.game.state.start('menu');
 
     },
     Reanudar: function(){
@@ -755,4 +807,30 @@ bullets.enableBody = true;
 
 module.exports = PlayScene;
 
+/*
+ if (this.cursors.up.isDown && hitPlatforms && this._rush.body.onFloor())
+
+        {   //player is on the ground, so he is allowed to start a jump
+                this.jumptimer = this.game.time.time;
+                this._rush.body.velocity.y = -1000;
+
+        } else if (this.cursors.up.isDown && (this.jumptimer !== 0))
+          
+          { //player is no longer on the ground, but is still holding the jump key
+                if ((this.game.time.time - this.jumptimer) > 325) { // player has been holding jump for over 600 millliseconds, it's time to stop him
+
+                    this.jumptimer = 0;
+
+                } else { // player is allowed to jump higher, not yet 600 milliseconds of jumping
+
+                  //this._rush.body.velocity.y -= 15;//525
+                  this._rush.body.velocity.y = -400-(120/(this.game.time.time - this.jumptimer));
+                }
+
+            } else if (this.jumptimer !== 0) { //reset jumptimer since the player is no longer holding the jump key
+
+                this.jumptimer = 0;
+
+            } 
+*/
 },{}]},{},[3]);

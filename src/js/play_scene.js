@@ -11,9 +11,12 @@ var jumptimer = 0;
 var winZone;
 var propulsion1;
 var propulsion2;
+var finalZone;
+var finalZone2;
 var platforms;
 var bullets;
 var Bullet;
+var nubes;
 //textos
 var textStart;
 //Pausa
@@ -31,12 +34,18 @@ var PlayScene = {
     _rush: {}, //player
     slime: {},
     torreta: {},
+    nube: {},
+    nube2: {},
+    nube3: {},
 
   //Método constructor...
     create: function () {    
       //plataforma para el deslizamiento del slime
     platforms = this.game.add.group();
 	platforms.enableBody = true;
+
+	nubes = this.game.add.group();
+	nubes.enableBody = true;
 
     var ledge = platforms.create(2400, 385, 'ground');
     ledge.body.immovable = true;
@@ -61,8 +70,8 @@ var PlayScene = {
         buttonReanudar.addChild(texto2); 
 
       //Cargar del tilemap y asignacion del tileset
-      this.game.load.tilemap('tilemap', 'images/map.json', null, Phaser.Tilemap.TILED_JSON);
-      this.game.load.image('tiles', 'images/tileset.png',  null, Phaser.Tilemap.TILED_JSON); 
+      //this.game.load.tilemap('tilemap', 'images/map.json', null, Phaser.Tilemap.TILED_JSON);
+      //this.game.load.image('tiles', 'images/tileset.png',  null, Phaser.Tilemap.TILED_JSON); 
 
       this.map = this.game.add.tilemap('tilemap');           
       this.map.addTilesetImage('tileset', 'tiles');     
@@ -75,8 +84,21 @@ var PlayScene = {
       var slimePos3 = this.map.objects["Objects"][5]; 
       var setaPos1 =  this.map.objects["Objects"][6];
       var setaPos2 =  this.map.objects["Objects"][7];  
+      var finalPos =  this.map.objects["Objects"][8];
+      var finalPos2 =  this.map.objects["Objects"][9]; 
 
-      //Creacion de las layers     
+    
+    //NUBES
+	    this.nube = this.game.add.sprite(400, slimePos.y, 'clouds');
+	    this.game.physics.arcade.enable(this.nube);
+	    this.nube.body.velocity.x = -30;
+	    this.nube2 = this.game.add.sprite(1200, start.y-100, 'clouds');
+	    this.game.physics.arcade.enable(this.nube2);
+	    this.nube2.body.velocity.x = -30;
+	    this.nube3 = this.game.add.sprite(2000, setaPos1.y-100, 'clouds');
+	    this.game.physics.arcade.enable(this.nube3);
+	    this.nube3.body.velocity.x = -30;
+    //LAYERS
       this.backgroundLayer = this.map.createLayer('Capa Fondo');
       this.water = this.map.createLayer('Agua');           
       this.death = this.map.createLayer('death'); //plano de muerte      
@@ -119,6 +141,9 @@ var PlayScene = {
       //Zonas de impulso
       this.propulsion1 = new Phaser.Rectangle(setaPos1.x, setaPos1.y, setaPos1.width, setaPos1.height);
       this.propulsion2 = new Phaser.Rectangle(setaPos2.x, setaPos2.y, setaPos2.width, setaPos2.height);
+      //Zonas colision nubes
+      this.finalZone = new Phaser.Rectangle(finalPos.x, finalPos.y, finalPos.width, finalPos.height);
+      this.finalZone2 = new Phaser.Rectangle(finalPos2.x, finalPos2.y, finalPos2.width, finalPos2.height);
 
       //tecla de Pausa
       this.pKey = this.input.keyboard.addKey(Phaser.Keyboard.P);
@@ -133,6 +158,8 @@ var PlayScene = {
     this.slime.body.velocity.x = 80;
     this.slime.body.collideWorldBounds = true;
     this.slime.animations.add('princi', [0, 1, 2, 3, 4], 5, true);
+
+   
 
 //Añadido del grupo balas.
 bullets = this.game.add.group();
@@ -222,6 +249,10 @@ bullets.enableBody = true;
           //this._rush.body.velocity.x = 500;
         }
 
+         if(this.finalZone.contains(this.nube.x + this.nube.width/2, this.nube.y + this.nube.height/2)){
+        		this.nube.x = this.finalZone2.x;
+        }
+
 
 
         this.game.physics.arcade.collide(this._rush, this.slime);
@@ -305,6 +336,7 @@ bullets.enableBody = true;
     },
     volverMenu: function (){
         this.game.state.start('gravityScene');
+        //this.game.state.start('menu');
 
     },
     Reanudar: function(){

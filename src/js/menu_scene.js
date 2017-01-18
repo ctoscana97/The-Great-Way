@@ -2,7 +2,7 @@ var MenuScene = {
     create: function () {
         
         var logo = this.game.add.sprite(this.game.camera.x+400, 
-                                        this.game.camera.y+300, 
+                                        this.game.camera.y+350, 
                                         'logo');
         logo.anchor.setTo(0.5, 0.5);
         var buttonStart = this.game.add.button(this.game.camera.x+400,
