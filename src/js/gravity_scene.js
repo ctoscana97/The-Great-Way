@@ -165,7 +165,7 @@ var GravityScene = {
 
         if(this.winZone.contains(this._rush.x + this._rush.width/2, 
           this._rush.y + this._rush.height/2)){
-          this.game.state.start('boot'); //Siguiente nivel
+          this.game.state.start('Nivel3'); //Siguiente nivel
         }
         if(this.areaZone.contains(this._rush.x + this._rush.width/2, 
           this._rush.y + this._rush.height/2)){

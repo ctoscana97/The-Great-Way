@@ -37,7 +37,7 @@ var salto;
     ///
 
 //Scena de juego.
-var PlayScene = {
+var Nivel3 = {
     menu: {},
     //_rush: {}, //player
     slime: {},
@@ -458,6 +458,7 @@ bullets.enableBody = true;
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
         this.game.stage.backgroundColor = '#a9f0ff';
         this.game.physics.arcade.enable(_rush);
+        this.game.currentlevel = 3;
         
         _rush.body.bounce.y = 0.2;
         _rush.body.gravity.y = 140;
@@ -476,4 +477,4 @@ bullets.enableBody = true;
     },   
 };
 
-module.exports = PlayScene;
+module.exports = Nivel3;

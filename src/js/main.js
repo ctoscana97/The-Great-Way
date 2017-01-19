@@ -5,6 +5,7 @@ var PlayScene = require('./play_scene');
 var GameOver = require('./gameover_scene');
 var MenuScene = require('./menu_scene');
 var GravityScene = require('./gravity_scene');  //Nueva escena para el segundo nivel
+var Nivel3 = require('./nivel3');  //Nueva escena para el segundo nivel
 
 var BootScene = {
   preload: function () {
@@ -44,6 +45,7 @@ var PreloaderScene = {
       this.game.load.image('clouds', 'images/clouds.png', 384, 288);
       this.game.load.spritesheet('crujidor', 'images/crujidor.png', 41, 45);
 
+      this.game.load.audio('musicaN1', 'images/Serenity.mp3');
       this.game.load.audio('musicaN3', 'images/MusicaNivel3.mp3');
       this.game.load.audio('salto', 'images/jump.wav');
     
@@ -89,6 +91,7 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game');
   game.state.add('play', PlayScene);
   game.state.add('gameOver', GameOver);
   game.state.add('gravityScene', GravityScene);
+  game.state.add('Nivel3', Nivel3);
   game.state.start('boot');
 }
 

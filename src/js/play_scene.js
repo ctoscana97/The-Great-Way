@@ -28,6 +28,9 @@ var buttonReanudar;
 
 var texto;
 var texto2;
+//Audio
+var musica;
+
 //Scena de juego.
 var PlayScene = {
   menu: {},
@@ -345,6 +348,7 @@ bullets.enableBody = true;
 
     onPlayerFell: function(){
         //TODO 6 Carga de 'gameOver';
+        musica.destroy();
         this.game.state.start('gameOver');
     },    
     checkPlayerFell: function(){
@@ -359,6 +363,11 @@ bullets.enableBody = true;
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
         this.game.stage.backgroundColor = '#a9f0ff';
         this.game.physics.arcade.enable(this._rush);
+        this.game.currentlevel = 1;
+
+        musica = this.game.add.audio('musicaN1');
+     	musica.loop = true;
+      	musica.play();
         
         this._rush.body.bounce.y = 0.2;
         this._rush.body.gravity.y = 750;
