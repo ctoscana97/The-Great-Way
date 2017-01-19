@@ -243,6 +243,7 @@ bullets.enableBody = true;
 
         //Para terminar el nivel:
         if(this.winZone.contains(this._rush.x + this._rush.width/2, this._rush.y + this._rush.height/2)){
+        	musica.destroy();
           this.game.state.start('gravityScene'); //Cargamos siguiente nivel
         }
 
@@ -338,8 +339,9 @@ bullets.enableBody = true;
       this.game.physics.arcade.isPaused = (this.game.physics.arcade.isPaused) ? false : true;
     },
     volverMenu: function (){
-        this.game.state.start('gravityScene');
-        //this.game.state.start('menu');
+    	musica.destroy();
+        //this.game.state.start('gravityScene');
+        this.game.state.start('menu');
 
     },
     Reanudar: function(){

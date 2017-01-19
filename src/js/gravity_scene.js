@@ -20,6 +20,8 @@ var buttonMenu;
 var buttonReanudar;
 var texto;
 var texto2;
+//Audio
+var musica;
 //Scena de juego.
 var GravityScene = {
     
@@ -165,6 +167,7 @@ var GravityScene = {
 
         if(this.winZone.contains(this._rush.x + this._rush.width/2, 
           this._rush.y + this._rush.height/2)){
+          musica.destroy();
           this.game.state.start('Nivel3'); //Siguiente nivel
         }
         if(this.areaZone.contains(this._rush.x + this._rush.width/2, 
@@ -209,6 +212,7 @@ var GravityScene = {
       this.game.physics.arcade.isPaused = (this.game.physics.arcade.isPaused) ? false : true;
     },
     volverMenu: function (){
+      musica.destroy();
         this.game.state.start('boot');
 
     },
@@ -218,6 +222,7 @@ var GravityScene = {
     
     onPlayerFell: function(){
         //TODO 6 Carga de 'gameOver';
+        musica.destroy();
         this.game.state.start('gameOver');
     },
     
@@ -234,6 +239,10 @@ var GravityScene = {
         this.game.stage.backgroundColor = '#a9f0ff';
         this.game.physics.arcade.enable(this._rush);
         this.game.currentlevel = 2;
+
+        musica = this.game.add.audio('musicaN2');
+        musica.loop = true;
+        musica.play();
         
         this._rush.body.bounce.y = 0.2;
         this._rush.body.gravity.y = -750;

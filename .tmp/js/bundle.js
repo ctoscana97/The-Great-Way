@@ -69,6 +69,8 @@ var buttonMenu;
 var buttonReanudar;
 var texto;
 var texto2;
+//Audio
+var musica;
 //Scena de juego.
 var GravityScene = {
     
@@ -214,6 +216,7 @@ var GravityScene = {
 
         if(this.winZone.contains(this._rush.x + this._rush.width/2, 
           this._rush.y + this._rush.height/2)){
+          musica.destroy();
           this.game.state.start('Nivel3'); //Siguiente nivel
         }
         if(this.areaZone.contains(this._rush.x + this._rush.width/2, 
@@ -258,6 +261,7 @@ var GravityScene = {
       this.game.physics.arcade.isPaused = (this.game.physics.arcade.isPaused) ? false : true;
     },
     volverMenu: function (){
+      musica.destroy();
         this.game.state.start('boot');
 
     },
@@ -267,6 +271,7 @@ var GravityScene = {
     
     onPlayerFell: function(){
         //TODO 6 Carga de 'gameOver';
+        musica.destroy();
         this.game.state.start('gameOver');
     },
     
@@ -283,6 +288,10 @@ var GravityScene = {
         this.game.stage.backgroundColor = '#a9f0ff';
         this.game.physics.arcade.enable(this._rush);
         this.game.currentlevel = 2;
+
+        musica = this.game.add.audio('musicaN2');
+        musica.loop = true;
+        musica.play();
         
         this._rush.body.bounce.y = 0.2;
         this._rush.body.gravity.y = -750;
@@ -352,6 +361,7 @@ var PreloaderScene = {
       this.game.load.spritesheet('crujidor', 'images/crujidor.png', 41, 45);
 
       this.game.load.audio('musicaN1', 'images/Serenity.mp3');
+      this.game.load.audio('musicaN2', 'images/Serenity_Invert.mp3');
       this.game.load.audio('musicaN3', 'images/MusicaNivel3.mp3');
       this.game.load.audio('salto', 'images/jump.wav');
     
@@ -1163,6 +1173,7 @@ bullets.enableBody = true;
 
         //Para terminar el nivel:
         if(this.winZone.contains(this._rush.x + this._rush.width/2, this._rush.y + this._rush.height/2)){
+        	musica.destroy();
           this.game.state.start('gravityScene'); //Cargamos siguiente nivel
         }
 
@@ -1258,8 +1269,9 @@ bullets.enableBody = true;
       this.game.physics.arcade.isPaused = (this.game.physics.arcade.isPaused) ? false : true;
     },
     volverMenu: function (){
-        this.game.state.start('gravityScene');
-        //this.game.state.start('menu');
+    	musica.destroy();
+        //this.game.state.start('gravityScene');
+        this.game.state.start('menu');
 
     },
     Reanudar: function(){

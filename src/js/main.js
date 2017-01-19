@@ -46,6 +46,7 @@ var PreloaderScene = {
       this.game.load.spritesheet('crujidor', 'images/crujidor.png', 41, 45);
 
       this.game.load.audio('musicaN1', 'images/Serenity.mp3');
+      this.game.load.audio('musicaN2', 'images/Serenity_Invert.mp3');
       this.game.load.audio('musicaN3', 'images/MusicaNivel3.mp3');
       this.game.load.audio('salto', 'images/jump.wav');
     
