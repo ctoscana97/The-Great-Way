@@ -71,6 +71,7 @@ var texto;
 var texto2;
 //Audio
 var musica;
+var salto;
 //Scena de juego.
 var GravityScene = {
     
@@ -190,6 +191,7 @@ var GravityScene = {
     if (this.cursors.up.isDown && hitPlatforms && !this._rush.body.onFloor())
 
         {   //Como el jugador esta en el suelo se le permite saltar.
+                salto.play(false);
                 this.jumptimer = this.game.time.time;
                 this._rush.body.velocity.y = 325;
 
@@ -292,6 +294,8 @@ var GravityScene = {
         musica = this.game.add.audio('musicaN2');
         musica.loop = true;
         musica.play();
+
+        salto = this.game.add.audio('salto');
         
         this._rush.body.bounce.y = 0.2;
         this._rush.body.gravity.y = -750;
@@ -958,7 +962,7 @@ var texto;
 var texto2;
 //Audio
 var musica;
-
+var salto;
 //Scena de juego.
 var PlayScene = {
   menu: {},
@@ -1146,6 +1150,7 @@ bullets.enableBody = true;
     if (this.cursors.up.isDown && hitPlatforms && this._rush.body.onFloor())
 
         {   //Como el jugador esta en el suelo se le permite saltar.
+        		salto.play(false);
                 this.jumptimer = this.game.time.time;
                 this._rush.body.velocity.y = -325;
 
@@ -1298,6 +1303,8 @@ bullets.enableBody = true;
         musica = this.game.add.audio('musicaN1');
      	musica.loop = true;
       	musica.play();
+
+      	salto = this.game.add.audio('salto');
         
         this._rush.body.bounce.y = 0.2;
         this._rush.body.gravity.y = 750;
