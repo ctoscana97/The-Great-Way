@@ -105,14 +105,11 @@ var Nivel3 = {
 
       this.map = this.game.add.tilemap('tilemap3');           
       this.map.addTilesetImage('tileset', 'tiles1');     
-      //Objetos del mapa creados con Tiled
-      /*var start = this.map.objects["Objects"][0];
-      var end = this.map.objects["Objects"][1];
-      var slimePos = this.map.objects["Objects"][2];  
-      var torretaPos = this.map.objects["Objects"][3];*/  
+      //Objetos del mapa creados con Tiled      
+      var end = this.map.objects["Objects"][0];
+      this.winZone = new Phaser.Rectangle(end.x, end.y, end.width, end.height);
 
       //Creacion de las layers     
-      //this.backgroundLayer = this.map.createLayer('Capa Fondo');
                  
       this.death = this.map.createLayer('death'); //plano de muerte      
       this.decorado = this.map.createLayer('Capa Transparente');
@@ -283,9 +280,10 @@ bullets.enableBody = true;
         this.checkPlayerFell();
 
         //Para terminar el nivel:
-        /*if(this.winZone.contains(this._rush.x + this._rush.width/2, this._rush.y + this._rush.height/2))
-          this.game.state.start('gravityScene');*/ //Cargamos siguiente nivel
-    //this.game.physics.arcade.collide(this._rush, this.slime);
+        if(this.winZone.contains(_rush.x + _rush.width/2, _rush.y + _rush.height/2)){
+          musica.destroy();
+          this.game.state.start('boot'); //Cargamos siguiente nivel
+        }
 
 
       this.game.physics.arcade.collide(slimes, platforms, function (slime, platform) {
