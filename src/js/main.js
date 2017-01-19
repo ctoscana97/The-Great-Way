@@ -30,9 +30,11 @@ var PreloaderScene = {
     this.load.onLoadStart.add(this.loadStart, this);
     //Carga de tilemap y animaciones    
       this.game.load.image('tiles', 'images/tileset.png');
+      this.game.load.image('tiles1', 'images/Tiledef.png');
       this.game.load.image('ground', 'images/platform.png');    
       this.game.load.tilemap('tilemap', 'images/map.json', null, Phaser.Tilemap.TILED_JSON);
       this.game.load.tilemap('tilemap2', 'images/map2.json', null, Phaser.Tilemap.TILED_JSON);
+      this.game.load.tilemap('tilemap3', 'images/map3.json', null, Phaser.Tilemap.TILED_JSON);
       this.game.load.spritesheet('dude', 'images/dude.png', 32, 48);
       this.game.load.spritesheet('slime', 'images/slime.png', 35, 25);
       this.game.load.spritesheet('torreta', 'images/torreta.png', 100.5, 67);
@@ -40,6 +42,10 @@ var PreloaderScene = {
       this.game.load.image('menuPausa', 'images/menuPausa.png', 250, 412);
       this.game.load.image('back', 'images/back.png', 800, 600);
       this.game.load.image('clouds', 'images/clouds.png', 384, 288);
+      this.game.load.spritesheet('crujidor', 'images/crujidor.png', 41, 45);
+
+      this.game.load.audio('musicaN3', 'images/MusicaNivel3.mp3');
+      this.game.load.audio('salto', 'images/jump.wav');
     
       //Escuchar el evento onLoadComplete con el método loadComplete que el state 'play'
       this.game.load.onLoadComplete.add(this.loadComplete, this);
