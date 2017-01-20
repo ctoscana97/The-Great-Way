@@ -186,7 +186,6 @@ bullets.enableBody = true;
       crujidor.body.immovable = true;
       crujidor.body.velocity.y = -50;
       crujidor.animations.add('cae', [0, 1, 2, 3], 5, false);
-      //torreta.animations.play('stand');
       rocks.add(crujidor);
       }
 
@@ -199,7 +198,6 @@ bullets.enableBody = true;
       crujidor.body.immovable = true;
       crujidor.body.velocity.y = -50;
       crujidor.animations.add('cae', [0, 1, 2, 3], 5, false);
-      //torreta.animations.play('stand');
       rocks.add(crujidor);
       }
 ///agua azul
@@ -282,7 +280,7 @@ bullets.enableBody = true;
         //Para terminar el nivel:
         if(this.winZone.contains(_rush.x + _rush.width/2, _rush.y + _rush.height/2)){
           musica.destroy();
-          this.game.state.start('boot'); //Cargamos siguiente nivel
+          this.game.state.start('endGame'); //Cargamos siguiente nivel
         }
 
 
@@ -301,8 +299,7 @@ bullets.enableBody = true;
         //roca.body.velocity.y = 0;
  
       });
-      //console.log(_rush.body.blocked.down);
-      //this.muevete(rocks);
+
       rocks.forEach(function(roca) {
         if(roca.body.blocked.up){
           roca.body.velocity.y = -1;

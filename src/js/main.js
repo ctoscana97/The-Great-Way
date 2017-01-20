@@ -6,6 +6,7 @@ var GameOver = require('./gameover_scene');
 var MenuScene = require('./menu_scene');
 var GravityScene = require('./gravity_scene');  //Nueva escena para el segundo nivel
 var Nivel3 = require('./nivel3');  //Nueva escena para el segundo nivel
+var endGame = require('./endGame');
 
 var BootScene = {
   preload: function () {
@@ -49,6 +50,13 @@ var PreloaderScene = {
       this.game.load.audio('musicaN2', 'images/Serenity_Invert.mp3');
       this.game.load.audio('musicaN3', 'images/MusicaNivel3.mp3');
       this.game.load.audio('salto', 'images/jump.wav');
+
+      this.game.load.spritesheet('hermano', 'images/brother.png', 46.25, 49);
+      this.game.load.image('luna', 'images/moon.png');
+      this.game.load.image('diosa', 'images/diosa.png');
+      this.game.load.image('mar', 'images/luzNa.png');
+      this.game.load.image('playa', 'images/playa.png');
+      this.game.load.audio('musiFinal', 'images/Bittersweet.mp3');
     
       //Escuchar el evento onLoadComplete con el método loadComplete que el state 'play'
       this.game.load.onLoadComplete.add(this.loadComplete, this);
@@ -93,6 +101,7 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game');
   game.state.add('gameOver', GameOver);
   game.state.add('gravityScene', GravityScene);
   game.state.add('Nivel3', Nivel3);
+  game.state.add('endGame', endGame);
   game.state.start('boot');
 }
 
