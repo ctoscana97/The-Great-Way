@@ -9,15 +9,16 @@ var disparanding;
 var jumptimer = 0;
 //GameObjects
 var winZone;
-var Bullet;//function
+var _rush;
+var geiser;
 //Groups
 var platforms;
 var bullets;
 var slimes;
 var torretas;
 var rocks;
-//textos
-var textStart;
+//flag
+var flag = false;
 //Pausa
 var pKey;
 var back; //backGround
@@ -25,7 +26,6 @@ var boolRocas = false;
 
 var buttonMenu;
 var buttonReanudar;
-var _rush = 10;
 var texto;
 var texto2;
 //Sonidos
@@ -39,9 +39,6 @@ var salto;
 //Scena de juego.
 var Nivel3 = {
     menu: {},
-    //_rush: {}, //player
-    slime: {},
-    torreta: {},
 
   //Método constructor...
     create: function () {    
@@ -50,35 +47,12 @@ var Nivel3 = {
 
     platforms.enableBody = true;
 
-    var ledge = platforms.create(400, 240, 'ground');
-    ledge.body.immovable = true;
-    ledge.scale.setTo(0.24, 0.5);
-    platforms.add(ledge);
- 
-    var ledge = platforms.create(665, 145, 'ground');
-    ledge.body.immovable = true;
-    ledge.scale.setTo(0.12, 0.5);
-    platforms.add(ledge);
-
-     var ledge = platforms.create(1025, 543, 'ground');
-    ledge.body.immovable = true;
-    ledge.scale.setTo(0.65, 0.5);
-    platforms.add(ledge);
-
-    var ledge = platforms.create(153, 545, 'ground');
-    ledge.body.immovable = true;
-    ledge.scale.setTo(0.15, 0.5);
-    platforms.add(ledge);
-
-    var ledge = platforms.create(1250, 960, 'ground');
-    ledge.body.immovable = true;
-    ledge.scale.setTo(0.24, 0.5);
-    platforms.add(ledge);
- 
-    var ledge = platforms.create(1380, 1030, 'ground');
-    ledge.body.immovable = true;
-    ledge.scale.setTo(0.24, 0.5);
-    platforms.add(ledge);
+    this.CreaPlataforma(400, 240, 0.24);
+    this.CreaPlataforma(665, 145, 0.12);
+    this.CreaPlataforma(1025, 543, 0.65);
+    this.CreaPlataforma(153, 545, 0.15);
+    this.CreaPlataforma(1250, 960, 0.24);
+    this.CreaPlataforma(1380, 1030, 0.24);
 
     platforms.alpha = 0;
     ///BOTONES
@@ -164,11 +138,18 @@ var Nivel3 = {
 
 ///////////Torretas
       torretas = this.game.add.group();
-      this.CreaTorreta(780, 40, this.game, 0, 100, 100, -10);
-      this.CreaTorreta(1325, 120, this.game, 0, 100, 100, -10);
-      this.CreaTorreta(420, 360, this.game, 215, 100, 100, 10);
-      this.CreaTorreta(140, 690, this.game, 225, 100, 100, 10);
+      this.CreaTorreta(780, 40, this.game, 0, -70, 120, -10);
+      this.CreaTorreta(1325, 120, this.game, 0, -100, 80, -10);
+      this.CreaTorreta(420, 360, this.game, 215, 100, 35, 10);
+      this.CreaTorreta(140, 690, this.game, 225, 70, 130, 100);
       this.CreaTorreta(260, 720, this.game, -20, -100, 60, -10);
+
+////geiser
+geiser = this.game.add.sprite(1470, 1080, 'cascada');
+this.game.physics.arcade.enable(geiser);
+geiser.scale.setTo(2.5, 3);
+geiser.alpha = 0;
+geiser.animations.add('subiendo', [0, 1, 2, 3], 10, true);
 
 //balas
 bullets = this.game.add.group();
@@ -178,28 +159,14 @@ bullets.enableBody = true;
       rocks = this.game.add.group();
 
       for(var i = 0; i < 3; i++){
-      var crujidor = this.game.add.sprite(850 + (i*120), 80, 'crujidor');
-      this.game.physics.arcade.enable(crujidor);
-      crujidor.body.bounce.y = 0;
-      crujidor.body.gravity.y = 0;
-      crujidor.body.collideWorldBounds = true;
-      crujidor.body.immovable = true;
-      crujidor.body.velocity.y = -50;
-      crujidor.animations.add('cae', [0, 1, 2, 3], 5, false);
-      rocks.add(crujidor);
+        this.CreaCrujidor(850 + (i*120), 80);
       }
 
       for(var i = 0; i < 9; i++){
-      var crujidor = this.game.add.sprite(360 + (i*80), 900, 'crujidor');
-      this.game.physics.arcade.enable(crujidor);
-      crujidor.body.bounce.y = 0;
-      crujidor.body.gravity.y = 0;
-      crujidor.body.collideWorldBounds = true;
-      crujidor.body.immovable = true;
-      crujidor.body.velocity.y = -50;
-      crujidor.animations.add('cae', [0, 1, 2, 3], 5, false);
-      rocks.add(crujidor);
+        this.CreaCrujidor(360 + (i*80), 900, this.game);
       }
+    this.CreaCrujidor(650, 320, this.game);
+
 ///agua azul
       this.water = this.map.createLayer('Efecto Azul');
       this.water.resizeWorld();
@@ -218,14 +185,17 @@ bullets.enableBody = true;
 
 
     var hitPlatforms = this.game.physics.arcade.collide(_rush, this.groundLayer);
-    this.game.physics.arcade.collide(_rush,rocks, this.RocaMata, null, this);
+    this.game.physics.arcade.collide(_rush, rocks, this.RocaMata, null, this);
     this.game.physics.arcade.collide(_rush, slimes, this.MatasOMueres, null, this);
     this.game.physics.arcade.collide(bullets, this.groundLayer, this.MataBala, null, this);
     this.game.physics.arcade.collide(_rush, bullets, this.onPlayerFell, null, this);
+    this.game.physics.arcade.collide(rocks, this.groundLayer);
+    this.game.physics.arcade.collide(geiser, _rush, this.LogicaGeiser, null, this);
     this.cursors = this.game.input.keyboard.createCursorKeys();
       //  Reset the players velocity (movement)
      _rush.body.velocity.x = 0;
 
+    if (flag === false){
     if (this.cursors.left.isDown)
     {
         //  Move to the left
@@ -247,7 +217,6 @@ bullets.enableBody = true;
 
         _rush.frame = 4;
     }
-    ////////////////
    
     if (this.cursors.up.isDown && hitPlatforms && _rush.body.onFloor())
 
@@ -258,22 +227,23 @@ bullets.enableBody = true;
 
         } else if (this.cursors.up.isDown && (this.jumptimer !== 0))
           
-          { //player is no longer on the ground, but is still holding the jump key
-                if ((this.game.time.time - this.jumptimer) > 400) { // player has been holding jump for over 600 millliseconds, it's time to stop him
+          { 
+                if ((this.game.time.time - this.jumptimer) > 400) {
 
                     this.jumptimer = 0;
 
-                } else { // player is allowed to jump higher, not yet 600 milliseconds of jumping
+                } else { 
 
-                  //this._rush.body.velocity.y -= 15;//525
-                  _rush.body.velocity.y = -100-(90/(this.game.time.time - this.jumptimer));
+                 
+                  _rush.body.velocity.y = -100-(100/(this.game.time.time - this.jumptimer));
                 }
 
-            } else if (this.jumptimer !== 0) { //reset jumptimer since the player is no longer holding the jump key
+            } else if (this.jumptimer !== 0) {
 
                 this.jumptimer = 0;
 
-            }   
+            }
+      }   
 
         this.checkPlayerFell();
 
@@ -294,11 +264,6 @@ bullets.enableBody = true;
 
       });
       
-      this.game.physics.arcade.collide(rocks, this.groundLayer, function (roca, suelo) {
-        
-        //roca.body.velocity.y = 0;
- 
-      });
 
       rocks.forEach(function(roca) {
         if(roca.body.blocked.up){
@@ -306,31 +271,42 @@ bullets.enableBody = true;
         }
         if (roca.body.onFloor()){
               roca.body.velocity.y = -30;
-          }
-        if(_rush.x > roca.x - 50 && _rush.x < roca.x + 50){
-            if (roca.body.blocked.up ){ //_rush.x <= roca.x) || (_rush.x >= roca.x && _rush.x < roca.x + 50)){
+        }
+
+        if(_rush.x > roca.x - 50 && _rush.x < roca.x + 50 && (roca.y + 40) < _rush.y){
+
+            if (roca.body.blocked.up ){
               roca.body.velocity.y = 250;
               roca.animations.play('cae');
             }
           }
         
+        
       }, this);
+  if (flag === true){
+    geiser.body.velocity.y = -300;
+    geiser.animations.play('subiendo');
+  }
 
-//balas
-    /*Bullet = function(game, x, y) {
-    Phaser.Sprite.call(this, game, x, y, "bullet"); 
-    this.game.physics.enable(this, Phaser.Physics.ARCADE);
-    }
+    },
 
-    Bullet.prototype = Object.create(Phaser.Sprite.prototype);
-    Bullet.prototype.constructor = Bullet;*/
+    CreaPlataforma: function (x, y, scaleX){
+    var ledge = platforms.create(x, y, 'ground');
+    ledge.body.immovable = true;
+    ledge.scale.setTo(scaleX, 0.5);
+    platforms.add(ledge);
+    },
 
-
-    /*this.game.physics.arcade.collide(bullets, this.groundLayer, function (bullet) {
-        bullet.destroy();
-    });*/
- 
-
+    CreaCrujidor: function (x, y, game){
+      var crujidor = this.game.add.sprite(x, y, 'crujidor');
+      this.game.physics.arcade.enable(crujidor);
+      crujidor.body.bounce.y = 0;
+      crujidor.body.gravity.y = 0;
+      crujidor.body.collideWorldBounds = true;
+      crujidor.body.immovable = true;
+      crujidor.body.velocity.y = -50;
+      crujidor.animations.add('cae', [0, 1, 2, 3], 5, false);
+      rocks.add(crujidor);
     },
 
     CreaSlime: function(x, y, game){
@@ -352,21 +328,18 @@ bullets.enableBody = true;
       torreta.scale.setTo(0.7, 0.7);
       torreta.angle = angle;
       disparanding = torreta.animations.add('stand', [0, 1, 2, 3], 1, true);
-      //torreta.animations.play('stand');
+      torreta.animations.play('stand');
       disparanding.onLoop.add(this.Dispara, {velX: velHor, velY: velVer, posX: torreta.x + spawn, posY: torreta.y, game: this.game }, this);
       torretas.add(torreta);
 
     },
 
         Dispara: function (velX, velY, posX, posY, game){
-        //var bullet = bullets.create(posX, posY, 'bullet');
         var bullet = this.game.add.sprite(this.posX, this.posY, 'bullet');
-        //var bullet = Phaser.Sprite.call(this, game, posX, posY, "bullet");
         this.game.physics.arcade.enable(bullet);
         bullet.body.bounce.y = 0.2;
-        bullet.body.velocity.y = this.velY; //80;
-        bullet.body.velocity.x = this.velX; //-30;
-        //console.log(bullets);
+        bullet.body.velocity.y = this.velY;
+        bullet.body.velocity.x = this.velX;
         bullets.add(bullet);
 
       },
@@ -374,13 +347,13 @@ bullets.enableBody = true;
 
     MataBala: function(bala, suelo) {
       
-      bala.destroy();
+      bala.kill();
     },
 
     MatasOMueres: function(player, slime){
 
       if (player.body.touching.left || player.body.touching.right){
-        musica.destroy();
+          musica.destroy();
           this.game.state.start('gameOver');        
       } else if (player.body.touching.down){
           slime.kill();
@@ -392,6 +365,14 @@ bullets.enableBody = true;
         musica.destroy();
           this.game.state.start('gameOver');
         }
+    },
+
+    LogicaGeiser: function(agua, player){
+      agua.alpha = 1;
+      flag = true;
+      player.frame = 4;
+      player.angle = -30; 
+
     },
 
     togglePause: function(){

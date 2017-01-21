@@ -41,10 +41,10 @@ var PreloaderScene = {
       this.game.load.spritesheet('slime', 'images/slime.png', 35, 25);
       this.game.load.spritesheet('torreta', 'images/torreta.png', 100.5, 67);
       this.game.load.spritesheet('bullet', 'images/fuego.png', 20.5, 20);
-      this.game.load.image('menuPausa', 'images/menuPausa.png', 250, 412);
       this.game.load.image('back', 'images/back.png', 800, 600);
       this.game.load.image('clouds', 'images/clouds.png', 384, 288);
       this.game.load.spritesheet('crujidor', 'images/crujidor.png', 41, 45);
+      this.game.load.spritesheet('cascada', 'images/arriba.png', 96, 173);
 
       this.game.load.audio('musicaN1', 'images/Serenity.mp3');
       this.game.load.audio('musicaN2', 'images/Serenity_Invert.mp3');

@@ -110,6 +110,7 @@ var PlayScene = {
 
       _rush = this.game.add.sprite(400, 600, 'dude');
       _rush.frame = 4;
+      _rush.angle = -30;
 
       bro = this.game.add.sprite(600, 500, 'hermano');
       this.game.physics.arcade.enable(bro);
@@ -159,7 +160,7 @@ var PlayScene = {
       //  Reset the players velocity (movement)
      _rush.body.velocity.x = 0;
 
-     if(contDude === 2 && contBro === 2){
+     if(contDude === 2 && contBro === 2 && bro.body.touching.down){
       _rush.body.velocity.x = 50;
       bro.body.velocity.x = -50;
 
@@ -204,6 +205,7 @@ var PlayScene = {
       fondo2.visible = true;
       diosa.visible = true;
       _rush.body.gravity.y = 0;
+      _rush.angle = 0;
       _rush.scale.setTo(0.6, 0.6);
       _rush.x =150;
       _rush.y =550;

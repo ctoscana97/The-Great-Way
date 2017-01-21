@@ -111,6 +111,7 @@ var PlayScene = {
 
       _rush = this.game.add.sprite(400, 600, 'dude');
       _rush.frame = 4;
+      _rush.angle = -30;
 
       bro = this.game.add.sprite(600, 500, 'hermano');
       this.game.physics.arcade.enable(bro);
@@ -160,7 +161,7 @@ var PlayScene = {
       //  Reset the players velocity (movement)
      _rush.body.velocity.x = 0;
 
-     if(contDude === 2 && contBro === 2){
+     if(contDude === 2 && contBro === 2 && bro.body.touching.down){
       _rush.body.velocity.x = 50;
       bro.body.velocity.x = -50;
 
@@ -205,6 +206,7 @@ var PlayScene = {
       fondo2.visible = true;
       diosa.visible = true;
       _rush.body.gravity.y = 0;
+      _rush.angle = 0;
       _rush.scale.setTo(0.6, 0.6);
       _rush.x =150;
       _rush.y =550;
@@ -663,10 +665,10 @@ var PreloaderScene = {
       this.game.load.spritesheet('slime', 'images/slime.png', 35, 25);
       this.game.load.spritesheet('torreta', 'images/torreta.png', 100.5, 67);
       this.game.load.spritesheet('bullet', 'images/fuego.png', 20.5, 20);
-      this.game.load.image('menuPausa', 'images/menuPausa.png', 250, 412);
       this.game.load.image('back', 'images/back.png', 800, 600);
       this.game.load.image('clouds', 'images/clouds.png', 384, 288);
       this.game.load.spritesheet('crujidor', 'images/crujidor.png', 41, 45);
+      this.game.load.spritesheet('cascada', 'images/arriba.png', 96, 173);
 
       this.game.load.audio('musicaN1', 'images/Serenity.mp3');
       this.game.load.audio('musicaN2', 'images/Serenity_Invert.mp3');
@@ -773,15 +775,16 @@ var disparanding;
 var jumptimer = 0;
 //GameObjects
 var winZone;
-var Bullet;//function
+var _rush;
+var geiser;
 //Groups
 var platforms;
 var bullets;
 var slimes;
 var torretas;
 var rocks;
-//textos
-var textStart;
+//flag
+var flag = false;
 //Pausa
 var pKey;
 var back; //backGround
@@ -789,7 +792,6 @@ var boolRocas = false;
 
 var buttonMenu;
 var buttonReanudar;
-var _rush = 10;
 var texto;
 var texto2;
 //Sonidos
@@ -803,9 +805,6 @@ var salto;
 //Scena de juego.
 var Nivel3 = {
     menu: {},
-    //_rush: {}, //player
-    slime: {},
-    torreta: {},
 
   //Método constructor...
     create: function () {    
@@ -814,35 +813,12 @@ var Nivel3 = {
 
     platforms.enableBody = true;
 
-    var ledge = platforms.create(400, 240, 'ground');
-    ledge.body.immovable = true;
-    ledge.scale.setTo(0.24, 0.5);
-    platforms.add(ledge);
- 
-    var ledge = platforms.create(665, 145, 'ground');
-    ledge.body.immovable = true;
-    ledge.scale.setTo(0.12, 0.5);
-    platforms.add(ledge);
-
-     var ledge = platforms.create(1025, 543, 'ground');
-    ledge.body.immovable = true;
-    ledge.scale.setTo(0.65, 0.5);
-    platforms.add(ledge);
-
-    var ledge = platforms.create(153, 545, 'ground');
-    ledge.body.immovable = true;
-    ledge.scale.setTo(0.15, 0.5);
-    platforms.add(ledge);
-
-    var ledge = platforms.create(1250, 960, 'ground');
-    ledge.body.immovable = true;
-    ledge.scale.setTo(0.24, 0.5);
-    platforms.add(ledge);
- 
-    var ledge = platforms.create(1380, 1030, 'ground');
-    ledge.body.immovable = true;
-    ledge.scale.setTo(0.24, 0.5);
-    platforms.add(ledge);
+    this.CreaPlataforma(400, 240, 0.24);
+    this.CreaPlataforma(665, 145, 0.12);
+    this.CreaPlataforma(1025, 543, 0.65);
+    this.CreaPlataforma(153, 545, 0.15);
+    this.CreaPlataforma(1250, 960, 0.24);
+    this.CreaPlataforma(1380, 1030, 0.24);
 
     platforms.alpha = 0;
     ///BOTONES
@@ -928,11 +904,18 @@ var Nivel3 = {
 
 ///////////Torretas
       torretas = this.game.add.group();
-      this.CreaTorreta(780, 40, this.game, 0, 100, 100, -10);
-      this.CreaTorreta(1325, 120, this.game, 0, 100, 100, -10);
-      this.CreaTorreta(420, 360, this.game, 215, 100, 100, 10);
-      this.CreaTorreta(140, 690, this.game, 225, 100, 100, 10);
+      this.CreaTorreta(780, 40, this.game, 0, -70, 120, -10);
+      this.CreaTorreta(1325, 120, this.game, 0, -100, 80, -10);
+      this.CreaTorreta(420, 360, this.game, 215, 100, 35, 10);
+      this.CreaTorreta(140, 690, this.game, 225, 70, 130, 100);
       this.CreaTorreta(260, 720, this.game, -20, -100, 60, -10);
+
+////geiser
+geiser = this.game.add.sprite(1470, 1080, 'cascada');
+this.game.physics.arcade.enable(geiser);
+geiser.scale.setTo(2.5, 3);
+geiser.alpha = 0;
+geiser.animations.add('subiendo', [0, 1, 2, 3], 10, true);
 
 //balas
 bullets = this.game.add.group();
@@ -942,28 +925,14 @@ bullets.enableBody = true;
       rocks = this.game.add.group();
 
       for(var i = 0; i < 3; i++){
-      var crujidor = this.game.add.sprite(850 + (i*120), 80, 'crujidor');
-      this.game.physics.arcade.enable(crujidor);
-      crujidor.body.bounce.y = 0;
-      crujidor.body.gravity.y = 0;
-      crujidor.body.collideWorldBounds = true;
-      crujidor.body.immovable = true;
-      crujidor.body.velocity.y = -50;
-      crujidor.animations.add('cae', [0, 1, 2, 3], 5, false);
-      rocks.add(crujidor);
+        this.CreaCrujidor(850 + (i*120), 80);
       }
 
       for(var i = 0; i < 9; i++){
-      var crujidor = this.game.add.sprite(360 + (i*80), 900, 'crujidor');
-      this.game.physics.arcade.enable(crujidor);
-      crujidor.body.bounce.y = 0;
-      crujidor.body.gravity.y = 0;
-      crujidor.body.collideWorldBounds = true;
-      crujidor.body.immovable = true;
-      crujidor.body.velocity.y = -50;
-      crujidor.animations.add('cae', [0, 1, 2, 3], 5, false);
-      rocks.add(crujidor);
+        this.CreaCrujidor(360 + (i*80), 900, this.game);
       }
+    this.CreaCrujidor(650, 320, this.game);
+
 ///agua azul
       this.water = this.map.createLayer('Efecto Azul');
       this.water.resizeWorld();
@@ -982,14 +951,17 @@ bullets.enableBody = true;
 
 
     var hitPlatforms = this.game.physics.arcade.collide(_rush, this.groundLayer);
-    this.game.physics.arcade.collide(_rush,rocks, this.RocaMata, null, this);
+    this.game.physics.arcade.collide(_rush, rocks, this.RocaMata, null, this);
     this.game.physics.arcade.collide(_rush, slimes, this.MatasOMueres, null, this);
     this.game.physics.arcade.collide(bullets, this.groundLayer, this.MataBala, null, this);
     this.game.physics.arcade.collide(_rush, bullets, this.onPlayerFell, null, this);
+    this.game.physics.arcade.collide(rocks, this.groundLayer);
+    this.game.physics.arcade.collide(geiser, _rush, this.LogicaGeiser, null, this);
     this.cursors = this.game.input.keyboard.createCursorKeys();
       //  Reset the players velocity (movement)
      _rush.body.velocity.x = 0;
 
+    if (flag === false){
     if (this.cursors.left.isDown)
     {
         //  Move to the left
@@ -1011,7 +983,6 @@ bullets.enableBody = true;
 
         _rush.frame = 4;
     }
-    ////////////////
    
     if (this.cursors.up.isDown && hitPlatforms && _rush.body.onFloor())
 
@@ -1022,22 +993,23 @@ bullets.enableBody = true;
 
         } else if (this.cursors.up.isDown && (this.jumptimer !== 0))
           
-          { //player is no longer on the ground, but is still holding the jump key
-                if ((this.game.time.time - this.jumptimer) > 400) { // player has been holding jump for over 600 millliseconds, it's time to stop him
+          { 
+                if ((this.game.time.time - this.jumptimer) > 400) {
 
                     this.jumptimer = 0;
 
-                } else { // player is allowed to jump higher, not yet 600 milliseconds of jumping
+                } else { 
 
-                  //this._rush.body.velocity.y -= 15;//525
-                  _rush.body.velocity.y = -100-(90/(this.game.time.time - this.jumptimer));
+                 
+                  _rush.body.velocity.y = -100-(100/(this.game.time.time - this.jumptimer));
                 }
 
-            } else if (this.jumptimer !== 0) { //reset jumptimer since the player is no longer holding the jump key
+            } else if (this.jumptimer !== 0) {
 
                 this.jumptimer = 0;
 
-            }   
+            }
+      }   
 
         this.checkPlayerFell();
 
@@ -1058,11 +1030,6 @@ bullets.enableBody = true;
 
       });
       
-      this.game.physics.arcade.collide(rocks, this.groundLayer, function (roca, suelo) {
-        
-        //roca.body.velocity.y = 0;
- 
-      });
 
       rocks.forEach(function(roca) {
         if(roca.body.blocked.up){
@@ -1070,31 +1037,42 @@ bullets.enableBody = true;
         }
         if (roca.body.onFloor()){
               roca.body.velocity.y = -30;
-          }
-        if(_rush.x > roca.x - 50 && _rush.x < roca.x + 50){
-            if (roca.body.blocked.up ){ //_rush.x <= roca.x) || (_rush.x >= roca.x && _rush.x < roca.x + 50)){
+        }
+
+        if(_rush.x > roca.x - 50 && _rush.x < roca.x + 50 && (roca.y + 40) < _rush.y){
+
+            if (roca.body.blocked.up ){
               roca.body.velocity.y = 250;
               roca.animations.play('cae');
             }
           }
         
+        
       }, this);
+  if (flag === true){
+    geiser.body.velocity.y = -300;
+    geiser.animations.play('subiendo');
+  }
 
-//balas
-    /*Bullet = function(game, x, y) {
-    Phaser.Sprite.call(this, game, x, y, "bullet"); 
-    this.game.physics.enable(this, Phaser.Physics.ARCADE);
-    }
+    },
 
-    Bullet.prototype = Object.create(Phaser.Sprite.prototype);
-    Bullet.prototype.constructor = Bullet;*/
+    CreaPlataforma: function (x, y, scaleX){
+    var ledge = platforms.create(x, y, 'ground');
+    ledge.body.immovable = true;
+    ledge.scale.setTo(scaleX, 0.5);
+    platforms.add(ledge);
+    },
 
-
-    /*this.game.physics.arcade.collide(bullets, this.groundLayer, function (bullet) {
-        bullet.destroy();
-    });*/
- 
-
+    CreaCrujidor: function (x, y, game){
+      var crujidor = this.game.add.sprite(x, y, 'crujidor');
+      this.game.physics.arcade.enable(crujidor);
+      crujidor.body.bounce.y = 0;
+      crujidor.body.gravity.y = 0;
+      crujidor.body.collideWorldBounds = true;
+      crujidor.body.immovable = true;
+      crujidor.body.velocity.y = -50;
+      crujidor.animations.add('cae', [0, 1, 2, 3], 5, false);
+      rocks.add(crujidor);
     },
 
     CreaSlime: function(x, y, game){
@@ -1116,21 +1094,18 @@ bullets.enableBody = true;
       torreta.scale.setTo(0.7, 0.7);
       torreta.angle = angle;
       disparanding = torreta.animations.add('stand', [0, 1, 2, 3], 1, true);
-      //torreta.animations.play('stand');
+      torreta.animations.play('stand');
       disparanding.onLoop.add(this.Dispara, {velX: velHor, velY: velVer, posX: torreta.x + spawn, posY: torreta.y, game: this.game }, this);
       torretas.add(torreta);
 
     },
 
         Dispara: function (velX, velY, posX, posY, game){
-        //var bullet = bullets.create(posX, posY, 'bullet');
         var bullet = this.game.add.sprite(this.posX, this.posY, 'bullet');
-        //var bullet = Phaser.Sprite.call(this, game, posX, posY, "bullet");
         this.game.physics.arcade.enable(bullet);
         bullet.body.bounce.y = 0.2;
-        bullet.body.velocity.y = this.velY; //80;
-        bullet.body.velocity.x = this.velX; //-30;
-        //console.log(bullets);
+        bullet.body.velocity.y = this.velY;
+        bullet.body.velocity.x = this.velX;
         bullets.add(bullet);
 
       },
@@ -1138,13 +1113,13 @@ bullets.enableBody = true;
 
     MataBala: function(bala, suelo) {
       
-      bala.destroy();
+      bala.kill();
     },
 
     MatasOMueres: function(player, slime){
 
       if (player.body.touching.left || player.body.touching.right){
-        musica.destroy();
+          musica.destroy();
           this.game.state.start('gameOver');        
       } else if (player.body.touching.down){
           slime.kill();
@@ -1156,6 +1131,14 @@ bullets.enableBody = true;
         musica.destroy();
           this.game.state.start('gameOver');
         }
+    },
+
+    LogicaGeiser: function(agua, player){
+      agua.alpha = 1;
+      flag = true;
+      player.frame = 4;
+      player.angle = -30; 
+
     },
 
     togglePause: function(){
@@ -1256,8 +1239,8 @@ var finalZone;
 var finalZone2;
 var platforms;
 var bullets;
-var Bullet;
 var nubes;
+var slimes;
 //textos
 var textStart;
 //Pausa
@@ -1276,7 +1259,6 @@ var salto;
 var PlayScene = {
   menu: {},
     _rush: {}, //player
-    slime: {},
     torreta: {},
     nube: {},
     nube2: {},
@@ -1284,16 +1266,17 @@ var PlayScene = {
 
   //Método constructor...
     create: function () {    
-      //plataforma para el deslizamiento del slime
-    platforms = this.game.add.group();
-	platforms.enableBody = true;
 
 	nubes = this.game.add.group();
 	nubes.enableBody = true;
 
-    var ledge = platforms.create(2400, 385, 'ground');
-    ledge.body.immovable = true;
-    ledge.scale.setTo(0.8, 0.9);
+    platforms = this.game.add.group();
+    platforms.enableBody = true;
+    this.CreaPlataforma(2400, 385, 0.8);
+    this.CreaPlataforma(1030, 330, 1.4);
+    this.CreaPlataforma(1550, 1285, 1.4);
+    platforms.alpha = 0;
+    
     ///BOTONES//////////////////////////////////
     buttonMenu = this.game.add.button(400, 450, 
                                           'button', 
@@ -1313,9 +1296,6 @@ var PlayScene = {
         texto2.anchor.set(0.5);        
         buttonReanudar.addChild(texto2); 
 
-      //Cargar del tilemap y asignacion del tileset
-      //this.game.load.tilemap('tilemap', 'images/map.json', null, Phaser.Tilemap.TILED_JSON);
-      //this.game.load.image('tiles', 'images/tileset.png',  null, Phaser.Tilemap.TILED_JSON); 
 
       this.map = this.game.add.tilemap('tilemap');           
       this.map.addTilesetImage('tileset', 'tiles');     
@@ -1323,13 +1303,12 @@ var PlayScene = {
       var start = this.map.objects["Objects"][0];
       var end = this.map.objects["Objects"][1];
       var slimePos = this.map.objects["Objects"][2];  
-      var torretaPos = this.map.objects["Objects"][3];
-      var slimePos2 = this.map.objects["Objects"][4]; 
-      var slimePos3 = this.map.objects["Objects"][5]; 
-      var setaPos1 =  this.map.objects["Objects"][6];
-      var setaPos2 =  this.map.objects["Objects"][7];  
-      var finalPos =  this.map.objects["Objects"][8];
-      var finalPos2 =  this.map.objects["Objects"][9]; 
+      var slimePos2 = this.map.objects["Objects"][3]; 
+      var slimePos3 = this.map.objects["Objects"][4]; 
+      var setaPos1 =  this.map.objects["Objects"][5];
+      var setaPos2 =  this.map.objects["Objects"][6];  
+      var finalPos =  this.map.objects["Objects"][7];
+      var finalPos2 =  this.map.objects["Objects"][8]; 
 
     
     //NUBES
@@ -1351,7 +1330,7 @@ var PlayScene = {
       this.torreta = this.game.add.sprite(1450, 580, 'torreta');
       disparanding = this.torreta.animations.add('stand', [0, 1, 2, 3], 2, true);
       //Llama al método Dispara en cada vuelta del loop de la animación.
-      disparanding.onLoop.add(this.Dispara, this);
+      disparanding.onLoop.add(this.Dispara, {velX: -120, velY: 40, posX: this.torreta.x -10, posY: this.torreta.y, game: this.game }, this);
       this.groundLayer = this.map.createLayer('Capa Terreno');       
       //Redimension
       this.groundLayer.resizeWorld(); //resize world and adjust to the screen
@@ -1394,16 +1373,12 @@ var PlayScene = {
       this.pKey.onDown.add(this.togglePause, this);      
 
       this.configure();
-//Inicialización del slime
-    this.slime = this.game.add.sprite(slimePos.x, slimePos.y, 'slime');
-    this.game.physics.arcade.enable(this.slime);
-    this.slime.body.bounce.y = 0.2;
-    this.slime.body.gravity.y = 300;
-    this.slime.body.velocity.x = 80;
-    this.slime.body.collideWorldBounds = true;
-    this.slime.animations.add('princi', [0, 1, 2, 3, 4], 5, true);
+//Inicialización de los slimes
+    slimes = this.game.add.group();
 
-   
+    this.CreaSlime(slimePos.x, slimePos.y, this.game);
+    this.CreaSlime(slimePos2.x, slimePos2.y, this.game);
+    this.CreaSlime(slimePos3.x, slimePos3.y, this.game);
 
 //Añadido del grupo balas.
 bullets = this.game.add.group();
@@ -1420,16 +1395,14 @@ bullets.enableBody = true;
       buttonReanudar.visible = false;
       back.visible = false;
     }
-    //Reproducción de la animación del slime.
-    this.slime.animations.play('princi');
-    //Reproducción de la animación de la torreta.
     this.torreta.animations.play('stand');
     //Colisión entre el jugador y el terreno.
     var hitPlatforms = this.game.physics.arcade.collide(this._rush, this.groundLayer);
     //Llama al método matas o mueres al colisionar con el slime.
-  	this.game.physics.arcade.collide(this._rush, this.slime, this.MatasOMueres, null, this);
+  	this.game.physics.arcade.collide(this._rush, slimes, this.MatasOMueres, null, this);
   	//Mata al personaje al tocar una bala.
   	this.game.physics.arcade.collide(this._rush, bullets, this.onPlayerFell, null, this);
+    this.game.physics.arcade.collide(bullets, this.groundLayer, this.MataBala, null, this);
     this.cursors = this.game.input.keyboard.createCursorKeys();
       //  Reset the players velocity (movement)
      this._rush.body.velocity.x = 0;
@@ -1500,11 +1473,8 @@ bullets.enableBody = true;
         }
 
 
-
-        this.game.physics.arcade.collide(this._rush, this.slime);
-
     //Hace que el slime recorra la plataforma en la que esté y gire antes de caerse para seguir recorriéndola indefinidamente.
-      this.game.physics.arcade.collide(this.slime, platforms, function (slime, platform) {
+      this.game.physics.arcade.collide(slimes, platforms, function (slime, platform) {
 
           if (slime.body.velocity.x > 0 && slime.x > platform.x + (platform.width - (slime.width + 5)) ||
                   slime.body.velocity.x < 0 && slime.x < platform.x) {
@@ -1514,40 +1484,55 @@ bullets.enableBody = true;
 
       });
 
-//Creación del prototipo balas.
-    Bullet = function(game, x, y) {
-    Phaser.Sprite.call(this, game, x, y, "bullet"); 
-    this.game.physics.enable(this, Phaser.Physics.ARCADE);
-    }
 
-    Bullet.prototype = Object.create(Phaser.Sprite.prototype);
-    Bullet.prototype.constructor = Bullet;
-
-    //Destrucción de la bala al tocar el terreno.
-    this.game.physics.arcade.collide(bullets, this.groundLayer, function (bullet) {
-        bullet.destroy();
-    });
  
 
     },
     //Función que se llama al tocar al slime. Si le tocas por los lados mueres y si saltas encima le matas.
-    MatasOMueres: function(){
+    MatasOMueres: function(player, slime){
 
       if (this._rush.body.touching.left || this._rush.body.touching.right){
           this.game.state.start('gameOver');        
       } else if (this._rush.body.touching.down){
-          this.slime.kill();
+          slime.kill();
       }
     },
 
+    MataBala: function(bala, suelo) {
+      
+      bala.kill();
+    },
 
     //Constructora de la bala
-    Dispara: function(){
-        var bullet = new Bullet(this.game, this.torreta.x + 10, this.torreta.y + 10);
-        bullet.body.velocity.y = 80;
-        bullet.body.velocity.x = -150;
+        Dispara: function (velX, velY, posX, posY, game){
+        var bullet = this.game.add.sprite(this.posX, this.posY, 'bullet');
+        this.game.physics.arcade.enable(bullet);
+        bullet.body.bounce.y = 0.2;
+        bullet.body.velocity.y = this.velY;
+        bullet.body.velocity.x = this.velX;
         bullets.add(bullet);
     },
+
+    CreaSlime: function(x, y, game){
+    var slime = this.game.add.sprite(x, y, 'slime');//1-(400,215)//2-(650,120)//3-(1200,520)//4-(150,520)//5-(1250,920)//6-(1375,1000)
+    this.game.physics.arcade.enable(slime);
+    slime.body.bounce.y = 0.2;
+    slime.body.gravity.y = 300;
+    slime.body.velocity.x = 80;
+    slime.body.collideWorldBounds = true;
+    slime.animations.add('princi', [0, 1, 2, 3, 4], 5, true);
+    slime.animations.play('princi');
+    slimes.add(slime);
+
+    },
+
+    CreaPlataforma: function (x, y, scaleX){
+    var ledge = platforms.create(x, y, 'ground');
+    ledge.body.immovable = true;
+    ledge.scale.setTo(scaleX, 0.5);
+    platforms.add(ledge);
+    },
+
     togglePause: function(){
       buttonMenu.destroy();
       buttonReanudar.destroy();
